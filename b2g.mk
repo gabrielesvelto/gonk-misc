@@ -20,6 +20,7 @@ PRODUCT_PACKAGES += \
 	init.b2g.rc \
 	killer \
 	libttspico \
+	libc++_static \
 	rild \
 	rilproxy \
 	oom-msg-logger \
