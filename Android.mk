@@ -330,19 +330,19 @@ endif
 # Gecko glue
 #
 
-include $(CLEAR_VARS)
-GECKO_PATH ?= gecko
-ifeq (,$(GECKO_OBJDIR))
-GECKO_OBJDIR := $(TARGET_OUT_INTERMEDIATES)/objdir-gecko
-endif
-MOZCONFIG_PATH := $(LOCAL_PATH)/default-gecko-config
-UNICODE_HEADER_PATH := $(abspath $(LOCAL_PATH)/Unicode.h)
-
-LOCAL_MODULE := gecko
-LOCAL_MODULE_CLASS := DATA
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_PATH := $(TARGET_OUT)
-include $(BUILD_PREBUILT)
+### -- include $(CLEAR_VARS)
+### -- GECKO_PATH ?= gecko
+### -- ifeq (,$(GECKO_OBJDIR))
+### -- GECKO_OBJDIR := $(TARGET_OUT_INTERMEDIATES)/objdir-gecko
+### -- endif
+### -- MOZCONFIG_PATH := $(LOCAL_PATH)/default-gecko-config
+### -- UNICODE_HEADER_PATH := $(abspath $(LOCAL_PATH)/Unicode.h)
+### -- 
+### -- LOCAL_MODULE := gecko
+### -- LOCAL_MODULE_CLASS := DATA
+### -- LOCAL_MODULE_TAGS := optional
+### -- LOCAL_MODULE_PATH := $(TARGET_OUT)
+### -- include $(BUILD_PREBUILT)
 
 PRESERVE_B2G_WEBAPPS := 0
 
@@ -381,7 +381,7 @@ PRESERVE_DIRS := distribution
 ifeq ($(PRESERVE_B2G_WEBAPPS), 1)
 PRESERVE_DIRS += webapps
 endif
-$(LOCAL_INSTALLED_MODULE): $(LOCAL_BUILT_MODULE) gaia-prefs $(APRIORI) $(PRELINK_MAP)
+$(LOCAL_INSTALLED_MODULE): $(LOCAL_BUILT_MODULE) $(APRIORI) $(PRELINK_MAP)
 	@echo Install dir: $(TARGET_OUT)/b2g
 
 	rm -rf $(filter-out $(addprefix $(TARGET_OUT)/b2g/,$(PRESERVE_DIRS)),$(wildcard $(TARGET_OUT)/b2g/*))
@@ -470,38 +470,38 @@ ifeq ($(strip $(GECKO_TOOLS_PREFIX)),)
 GECKO_TOOLS_PREFIX = $(TARGET_TOOLS_PREFIX)
 endif
 
-.PHONY: $(LOCAL_BUILT_MODULE)
-$(LOCAL_BUILT_MODULE): $(TARGET_CRTBEGIN_DYNAMIC_O) $(TARGET_CRTEND_O) $(addprefix $(TARGET_OUT_SHARED_LIBRARIES)/,$(GECKO_LIB_DEPS))
-	(echo "export GECKO_OBJDIR=$(abspath $(GECKO_OBJDIR))"; \
-	echo "export GECKO_TOOLS_PREFIX=$(abspath $(GECKO_TOOLS_PREFIX))"; \
-	echo "export PRODUCT_OUT=$(abspath $(PRODUCT_OUT))" ) > .var.profile
-	export CONFIGURE_ARGS="$(GECKO_CONFIGURE_ARGS)" && \
-	export GONK_PRODUCT="$(TARGET_DEVICE)" && \
-	export TARGET_ARCH="$(TARGET_ARCH)" && \
-	export TARGET_BUILD_VARIANT="$(TARGET_BUILD_VARIANT)" && \
-	export TARGET_C_INCLUDES="$(addprefix -isystem ,$(abspath $(TARGET_C_INCLUDES)))" && \
-	export PLATFORM_SDK_VERSION="$(PLATFORM_SDK_VERSION)" && \
-	export HOST_OS="$(HOST_OS)" && \
-	export GECKO_TOOLS_PREFIX="$(abspath $(GECKO_TOOLS_PREFIX))" && \
-	export GONK_PATH="$(abspath .)" && \
-	export GECKO_OBJDIR="$(abspath $(GECKO_OBJDIR))" && \
-	export USE_CACHE=$(USE_CCACHE) && \
-	export MOZCONFIG="$(abspath $(MOZCONFIG_PATH))" && \
-	export EXTRA_INCLUDE="-include $(UNICODE_HEADER_PATH)" && \
-	export DISABLE_JEMALLOC="$(DISABLE_JEMALLOC)" && \
-	export B2G_UPDATER="$(B2G_UPDATER)" && \
-	export B2G_UPDATE_CHANNEL="$(B2G_UPDATE_CHANNEL)" && \
-	export ARCH_ARM_VFP="$(ARCH_ARM_VFP)" && \
-	export MALLOC_IMPL="$(MALLOC_IMPL)" && \
-	echo $(MAKE) -C $(GECKO_PATH) -f client.mk $(SHOW_COMMAND_GECKO) MOZ_MAKE_FLAGS= && \
-	$(MAKE) -C $(GECKO_PATH) -f client.mk $(SHOW_COMMAND_GECKO) MOZ_MAKE_FLAGS= && \
-	rm -f $(GECKO_OBJDIR)/dist/b2g-*.tar.gz && \
-	for LOCALE in $(MOZ_CHROME_MULTILOCALE); do \
-          $(MAKE) -C $(GECKO_OBJDIR)/b2g/locales merge-$$LOCALE LOCALE_MERGEDIR=$(GECKO_OBJDIR)/b2g/locales/merge-$$LOCALE && \
-          $(MAKE) -C $(GECKO_OBJDIR)/b2g/locales chrome-$$LOCALE LOCALE_MERGEDIR=$(GECKO_OBJDIR)/b2g/locales/merge-$$LOCALE ; \
-	done && \
-	$(MAKE) -C $(GECKO_OBJDIR) package && \
-	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.gz $@
+### -- .PHONY: $(LOCAL_BUILT_MODULE)
+### -- $(LOCAL_BUILT_MODULE): $(TARGET_CRTBEGIN_DYNAMIC_O) $(TARGET_CRTEND_O) $(addprefix $(TARGET_OUT_SHARED_LIBRARIES)/,$(GECKO_LIB_DEPS))
+### -- 	(echo "export GECKO_OBJDIR=$(abspath $(GECKO_OBJDIR))"; \
+### -- 	echo "export GECKO_TOOLS_PREFIX=$(abspath $(GECKO_TOOLS_PREFIX))"; \
+### -- 	echo "export PRODUCT_OUT=$(abspath $(PRODUCT_OUT))" ) > .var.profile
+### -- 	export CONFIGURE_ARGS="$(GECKO_CONFIGURE_ARGS)" && \
+### -- 	export GONK_PRODUCT="$(TARGET_DEVICE)" && \
+### -- 	export TARGET_ARCH="$(TARGET_ARCH)" && \
+### -- 	export TARGET_BUILD_VARIANT="$(TARGET_BUILD_VARIANT)" && \
+### -- 	export TARGET_C_INCLUDES="$(addprefix -isystem ,$(abspath $(TARGET_C_INCLUDES)))" && \
+### -- 	export PLATFORM_SDK_VERSION="$(PLATFORM_SDK_VERSION)" && \
+### -- 	export HOST_OS="$(HOST_OS)" && \
+### -- 	export GECKO_TOOLS_PREFIX="$(abspath $(GECKO_TOOLS_PREFIX))" && \
+### -- 	export GONK_PATH="$(abspath .)" && \
+### -- 	export GECKO_OBJDIR="$(abspath $(GECKO_OBJDIR))" && \
+### -- 	export USE_CACHE=$(USE_CCACHE) && \
+### -- 	export MOZCONFIG="$(abspath $(MOZCONFIG_PATH))" && \
+### -- 	export EXTRA_INCLUDE="-include $(UNICODE_HEADER_PATH)" && \
+### -- 	export DISABLE_JEMALLOC="$(DISABLE_JEMALLOC)" && \
+### -- 	export B2G_UPDATER="$(B2G_UPDATER)" && \
+### -- 	export B2G_UPDATE_CHANNEL="$(B2G_UPDATE_CHANNEL)" && \
+### -- 	export ARCH_ARM_VFP="$(ARCH_ARM_VFP)" && \
+### -- 	export MALLOC_IMPL="$(MALLOC_IMPL)" && \
+### -- 	echo $(MAKE) -C $(GECKO_PATH) -f client.mk $(SHOW_COMMAND_GECKO) MOZ_MAKE_FLAGS= && \
+### -- 	$(MAKE) -C $(GECKO_PATH) -f client.mk $(SHOW_COMMAND_GECKO) MOZ_MAKE_FLAGS= && \
+### -- 	rm -f $(GECKO_OBJDIR)/dist/b2g-*.tar.gz && \
+### -- 	for LOCALE in $(MOZ_CHROME_MULTILOCALE); do \
+### --           $(MAKE) -C $(GECKO_OBJDIR)/b2g/locales merge-$$LOCALE LOCALE_MERGEDIR=$(GECKO_OBJDIR)/b2g/locales/merge-$$LOCALE && \
+### --           $(MAKE) -C $(GECKO_OBJDIR)/b2g/locales chrome-$$LOCALE LOCALE_MERGEDIR=$(GECKO_OBJDIR)/b2g/locales/merge-$$LOCALE ; \
+### -- 	done && \
+### -- 	$(MAKE) -C $(GECKO_OBJDIR) package && \
+### -- 	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.gz $@
 
 MAKE_SYM_STORE_PATH := \
   $(abspath $(PRODUCT_OUT)/symbols) \
