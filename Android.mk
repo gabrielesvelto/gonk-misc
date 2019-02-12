@@ -117,6 +117,7 @@ $(call intermediates-dir-for,APPS,framework-res,,COMMON)/package-export.apk:
 	zip $@ `dirname $@`/dummy
 
 
+DISABLE_SOURCES_XML := true
 ifneq ($(DISABLE_SOURCES_XML),true)
 ifneq (,$(realpath .repo/manifest.xml))
 #
@@ -330,19 +331,19 @@ endif
 # Gecko glue
 #
 
-### -- include $(CLEAR_VARS)
-### -- GECKO_PATH ?= gecko
-### -- ifeq (,$(GECKO_OBJDIR))
-### -- GECKO_OBJDIR := $(TARGET_OUT_INTERMEDIATES)/objdir-gecko
-### -- endif
-### -- MOZCONFIG_PATH := $(LOCAL_PATH)/default-gecko-config
-### -- UNICODE_HEADER_PATH := $(abspath $(LOCAL_PATH)/Unicode.h)
-### -- 
-### -- LOCAL_MODULE := gecko
-### -- LOCAL_MODULE_CLASS := DATA
-### -- LOCAL_MODULE_TAGS := optional
-### -- LOCAL_MODULE_PATH := $(TARGET_OUT)
-### -- include $(BUILD_PREBUILT)
+include $(CLEAR_VARS)
+GECKO_PATH ?= gecko
+ifeq (,$(GECKO_OBJDIR))
+GECKO_OBJDIR := $(TARGET_OUT_INTERMEDIATES)/objdir-gecko
+endif
+MOZCONFIG_PATH := $(LOCAL_PATH)/default-gecko-config
+UNICODE_HEADER_PATH := $(abspath $(LOCAL_PATH)/Unicode.h)
+
+#LOCAL_MODULE := gecko
+#LOCAL_MODULE_CLASS := DATA
+#LOCAL_MODULE_TAGS := optional
+#LOCAL_MODULE_PATH := $(TARGET_OUT)
+#include $(BUILD_PREBUILT)
 
 PRESERVE_B2G_WEBAPPS := 0
 
