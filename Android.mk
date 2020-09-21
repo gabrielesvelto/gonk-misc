@@ -261,6 +261,8 @@ else
 	export MOZ_DISABLE_LTO="$(MOZ_DISABLE_LTO)" && \
 	export MOZ_SANDBOX_GPU_NODE="$(MOZ_SANDBOX_GPU_NODE)" && \
 	export HOST_OS="$(HOST_OS)" && \
+	rm -rf $(GECKO_OBJDIR)/b2g-sysroot && \
+	$(SHELL) $(GECKO_PATH)/taskcluster/scripts/misc/create-b2g-sysroot.sh $(GECKO_OBJDIR) && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh) && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh package) && \
 	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.gz $@
