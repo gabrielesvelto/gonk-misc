@@ -13,9 +13,6 @@ PRODUCT_PACKAGES += \
 	libcarthage \
 	gecko \
 	api-daemon \
-	api-daemon.sh \
-	updater-daemon \
-	updater-daemon.sh \
 	bluetoothd \
 	librecovery \
 	gaia \

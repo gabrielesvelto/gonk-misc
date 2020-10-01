@@ -30,11 +30,7 @@ service radvd /system/bin/radvd -C /data/misc/radvd/radvd.conf \
     disabled
     oneshot
 
-service api-daemon /system/bin/api-daemon.sh
-    class main
-    user root
-
-service updater-daemon /system/bin/updater-daemon.sh
+service api-daemon /system/bin/api-daemon /system/api-daemon/config.toml
     class main
     user root
 
