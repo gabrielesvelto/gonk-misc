@@ -181,6 +181,10 @@ GECKO_LIB_DEPS := \
 	libstagefright_omx.so \
 	libsysutils.so \
 	android.hardware.gnss@1.0.so \
+	android.hardware.graphics.composer@2.1.so \
+	android.hardware.graphics.composer@2.2.so \
+	android.hardware.graphics.composer@2.3.so \
+	android.hardware.power@1.0.so \
 	android.hardware.radio@1.0.so \
 	android.hardware.vibrator@1.0.so \
 	android.hardware.sensors@1.0.so \
@@ -202,6 +206,7 @@ GECKO_LIB_DEPS := \
 	binder_b2g_telephony_interface-cpp.so \
 	libc++.so \
 	libbinder.so \
+	libfmq.so \
 	libutils.so \
 	libcutils.so \
 	libhardware_legacy.so \
@@ -209,6 +214,7 @@ GECKO_LIB_DEPS := \
 	libui.so \
 	libgui.so \
 	libsuspend.so \
+	libsync.so \
 	libhidlbase.so \
 	libvold_binder_shared.so \
 	libttspico.so \
