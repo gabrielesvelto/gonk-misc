@@ -19,12 +19,12 @@ for arg in "$@"
   done
 
 toybox ps -A $args | (
-  IFS= read header
+  heads="USER      PID  PPID     VSZ    RSS WCHAN            ADDR S NAME"
   new_hdr="APPLICATION    SEC"
   if [ "${report_oom}" == "1" ]; then
     new_hdr="${new_hdr}  OOM_ADJ  OOM_SCORE  OOM_SCORE_ADJ "
   fi
-  echo "${new_hdr} ${header}"
+  echo "${new_hdr} ${heads}"
   #
   # Make a pass and figure out which processes are the b2g processes
   #
@@ -64,7 +64,7 @@ toybox ps -A $args | (
       done < /proc/${pid}/status
       comm="$comm                "
       new_fields="${comm:0:16} ${seccomp:-0}"
-      line="${fmt_user:0:9} ${fmt_pid:0:5} ${fmt_ppid:0:5} ${pid_rest[${pid}]}"
+      line="${fmt_user:0:9} ${fmt_pid:0:5}${fmt_ppid:0:5} ${pid_rest[${pid}]}"
       if [ "${report_oom}" == "1" ]; then
         oom_adj="   $(cat /proc/${pid}/oom_adj)    "
         oom_score="   $(cat /proc/${pid}/oom_score)      "
