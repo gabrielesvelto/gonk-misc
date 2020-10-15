@@ -10,7 +10,6 @@ PRODUCT_PACKAGES += \
 	gonkservices \
 	init.b2g.rc \
 	init.bluetooth.rc \
-	libcarthage \
 	gecko \
 	api-daemon \
 	bluetoothd \
