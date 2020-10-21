@@ -161,6 +161,7 @@ endif
 $(LOCAL_INSTALLED_MODULE) : $(LOCAL_BUILT_MODULE)
 	@echo Install dir: $(TARGET_OUT)/b2g
 	rm -rf $(filter-out $(addprefix $(TARGET_OUT)/b2g/,$(PRESERVE_DIRS)),$(wildcard $(TARGET_OUT)/b2g/*))
+	mkdir -p $(TARGET_OUT)/b2g/defaults/pref
 	cd $(TARGET_OUT) && tar xvfz $(abspath $<)
 ifneq ($(EXPORT_DEVICE_PREFS),)
 	cp -n $(EXPORT_DEVICE_PREFS)/*.js $(TARGET_OUT)/b2g/defaults/pref/
