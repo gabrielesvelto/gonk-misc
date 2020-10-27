@@ -53,6 +53,13 @@ if [ -z "$B2G_DIR" ]; then
   B2G_DIR="/system/b2g"
 fi
 
+EMULATOR=`getprop ro.kernel.qemu`
+if [ "$EMULATOR" == "1" -a ! -d /system/b2g ]; then
+  log -p E "Empty emulator detected not starting b2g."
+  setprop sys.boot_completed 1
+  exit 1
+fi
+
 LD_PRELOAD="$B2G_DIR/libmozglue.so"
 if [ -f "$B2G_DIR/libdmd.so" ]; then
   echo "Running with DMD."
