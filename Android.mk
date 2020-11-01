@@ -131,6 +131,7 @@ LOCAL_MODULE	   := b2gkillerd
 LOCAL_MODULE_TAGS  := optional
 LCOAL_MODULE_CLASS := EXECUTABLES
 LOCAL_SRC_FILES	   := b2gkillerd.cpp
+LOCAL_SHARED_LIBRARIES := libcutils liblog
 include $(BUILD_EXECUTABLE)
 
 #
