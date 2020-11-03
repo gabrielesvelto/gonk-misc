@@ -1,4 +1,3 @@
-#include <cutils/properties.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
@@ -19,11 +18,6 @@
 #include <memory>
 #include <vector>
 #include <set>
-
-#ifdef ANDROID
-#include "android/log.h"
-#define LOGB2GKILLER(...) __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__)
-#endif
 
 /**
  * Classes:
@@ -95,30 +89,7 @@
 // Half life period = ln(0.5) / ln(EMA_FACTOR_DFL)
 // new_value = old_value * EMA_FACTOR_DFL ^ n-seconds
 #define EMA_FACTOR_DFL 0.1
-#define PRESSURE_LEVEL "medium"
 
-static double mem_pressure_threshold = 3.0;
-
-// Trigger GC/CC only when the memory pressure is between max and min
-// threshold below.
-static double gc_cc_max = 2.5;
-static double gc_cc_min = 1.5;
-
-/**
-  * Dirty memory have to be written out before reclaiming it while
-  * clean memory can be reclaimed and used without additional cost.
-  * So, we have to weigh dirty memory differently.
-  */
-static double dirty_mem_weight = 0.2;
-
-/**
-  * For the case of zram, swapped pages take memory too.  They are
-  * compressed, so it shoud multiply a weight.
-  */
-static double swapped_mem_weight = 0.5;
-
-// Consecutive kicks should be longer than |kMinKickInterval| seconds.
-static double min_kick_interval = 0.5;
 
 /**
  * Counting memory pressure with a moving average.
@@ -418,6 +389,19 @@ private:
  */
 class ProcessKiller {
   /**
+   * Dirty memory have to be written out before reclaiming it while
+   * clean memory can be reclaimed and used without additional cost.
+   * So, we have to weigh dirty memory differently.
+   */
+  constexpr static double DIRTY_MEM_WEIGHT = 0.2;
+
+  /**
+   * For the case of zram, swapped pages take memory too.  They are
+   * compressed, so it shoud multiply a weight.
+   */
+  constexpr static double SWAPPED_MEM_WEIGHT = 0.5;
+
+  /**
    * Add proccess processes to a ProcessList.  The are found from
    * cgroups of b2g/fg, b2g/bg, and b2g/bg/try_to_keep.  They are
    * belong to foreground, background, and try_to_keep processes.
@@ -470,8 +454,8 @@ class ProcessKiller {
     // available memory from shared memory to kill a process.
     double score =
       aPInfo.mPrivateClean +
-      aPInfo.mPrivateDirty * dirty_mem_weight +
-      aPInfo.mVmSwap * swapped_mem_weight;
+      aPInfo.mPrivateDirty * DIRTY_MEM_WEIGHT +
+      aPInfo.mVmSwap * SWAPPED_MEM_WEIGHT;
     return score;
   }
 
@@ -526,6 +510,14 @@ public:
   }
 };
 
+
+#define MEM_PRESSURE_THRESHOLD 3.0
+#define PRESSURE_LEVEL "medium"
+
+// Trigger GC/CC only when the memory pressure is between max and min
+// threshold below.
+#define GC_CC_MAX 2.5
+#define GC_CC_MIN 1.5
 
 
 /**
@@ -606,6 +598,8 @@ private:
 #define KICK_GCCC_PATH "/dev/socket/kickgccc"
 
 class GCCCKicker {
+  static constexpr double kMinKickInterval = 0.5;
+
   static int FindB2GParent() {
     int parent = -1;
 
@@ -676,12 +670,12 @@ class GCCCKicker {
 public:
   // Request the parent process to kick GC/CC.
   static void Kick() {
-    // Consecutive kicks should be longer than |min_kick_interval| seconds.
+    // Consecutive kicks should be longer than |kMinKickInterval| seconds.
     timespec tm;
     clock_gettime(CLOCK_REALTIME_COARSE, &tm);
     double tm_diff = (double)(tm.tv_sec - mLastTm.tv_sec) +
       (double)(tm.tv_nsec - mLastTm.tv_nsec) * 1e-9;
-    if (tm_diff < min_kick_interval) {
+    if (tm_diff < kMinKickInterval) {
       return;
     }
 
@@ -712,7 +706,7 @@ void WatchMemPressure() {
   printf("The half life of the memory pressure counter is %fs.\n",
          mpcounter->HalfLifePeriod());
   printf("Kill processes once the counter is over %f.\n\n",
-         mem_pressure_threshold);
+         MEM_PRESSURE_THRESHOLD);
 
   MemPressureWatcher watcher;
 
@@ -722,19 +716,15 @@ void WatchMemPressure() {
    */
   auto killer = [&](unsigned int cnt) -> bool {
     mpcounter->Add(cnt);
-    bool memory_too_low = mpcounter->Average() > mem_pressure_threshold;
+    bool memory_too_low = mpcounter->Average() > MEM_PRESSURE_THRESHOLD;
     if (memory_too_low) {
       ProcessKiller::KillOneProc();
       printf("memory pressure counter %u, average %f\n",
              cnt, mpcounter->Average());
-#ifdef ANDROID
-      LOGB2GKILLER("memory pressure counter %u, average %f\n",
-                   cnt, mpcounter->Average());
-#endif
     }
 
-    bool do_gc_cc = (mpcounter->Average() >= gc_cc_min &&
-                     mpcounter->Average() <= gc_cc_max);
+    bool do_gc_cc = (mpcounter->Average() >= GC_CC_MIN &&
+                     mpcounter->Average() <= GC_CC_MAX);
     if (do_gc_cc) {
       GCCCKicker::Kick();
     }
@@ -781,32 +771,6 @@ bool CheckCgroups() {
 
 int
 main() {
-  #ifdef ANDROID
-  char buf[PROPERTY_VALUE_MAX] = {'\0'};
-  property_get("ro.b2gkillerd.mem_pressure_threshold", buf, "3.0");
-  mem_pressure_threshold = atof(buf);
-
-  property_get("ro.b2gkillerd.gc_cc_max", buf, "2.5");
-  gc_cc_max = atof(buf);
-
-  property_get("ro.b2gkillerd.gc_cc_min", buf, "1.5");
-  gc_cc_min = atof(buf);
-
-  property_get("ro.b2gkillerd.dirty_mem_weight", buf, "0.2");
-  dirty_mem_weight = atof(buf);
-
-  property_get("ro.b2gkillerd.swapped_mem_weight", buf, "0.5");
-  swapped_mem_weight= atof(buf);
-
-  property_get("ro.b2gkillerd.min_kick_interval", buf, "0.5");
-  min_kick_interval = atof(buf);
-
-  LOGB2GKILLER("Reading config: mem_pressure_threshold: %f, gc_cc_max: %f,"
-               "gc_cc_min: %f, dirty_mem_weight: %f, swapped_mem_weight: %f,"
-               "minkickinterval: %f \n", mem_pressure_threshold, gc_cc_max,
-               gc_cc_min, dirty_mem_weight, swapped_mem_weight, min_kick_interval);
-  #endif
-
   if (CheckCgroups()) {
     return 255;
   }
