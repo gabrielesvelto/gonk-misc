@@ -245,6 +245,9 @@ GECKO_LIB_DEPS += \
 	android.hardware.gnss@1.1.so \
 	android.hardware.gnss@2.0.so \
 	$(NULL)
+
+GECKO_MODULE_DEPS += \
+	com.android.runtime
 endif
 
 ifeq ($(IME_ENGINE), touchpal)
@@ -253,7 +256,7 @@ endif
 PRODUCTION_OS_NAME ?= KAIOS
 
 .PHONY: $(LOCAL_BUILT_MODULE)
-$(LOCAL_BUILT_MODULE): $(TARGET_CRTBEGIN_DYNAMIC_O) $(TARGET_CRTEND_O) $(addprefix $(TARGET_OUT_SHARED_LIBRARIES)/,$(GECKO_LIB_DEPS)) $(GECKO_LIB_STATIC)
+$(LOCAL_BUILT_MODULE): $(TARGET_CRTBEGIN_DYNAMIC_O) $(TARGET_CRTEND_O) $(addprefix $(TARGET_OUT_SHARED_LIBRARIES)/,$(GECKO_LIB_DEPS)) $(GECKO_LIB_STATIC) $(GECKO_MODULE_DEPS)
 ifeq ($(USE_PREBUILT_B2G),1)
 	@echo -e "\033[0;33m ==== Use prebuilt gecko ==== \033[0m";
 	mkdir -p $(@D) && cp $(abspath $(PREFERRED_B2G)) $@
