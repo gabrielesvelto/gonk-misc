@@ -163,7 +163,7 @@ $(LOCAL_INSTALLED_MODULE) : $(LOCAL_BUILT_MODULE)
 	@echo Install dir: $(TARGET_OUT)/b2g
 	rm -rf $(filter-out $(addprefix $(TARGET_OUT)/b2g/,$(PRESERVE_DIRS)),$(wildcard $(TARGET_OUT)/b2g/*))
 	mkdir -p $(TARGET_OUT)/b2g/defaults/pref
-	cd $(TARGET_OUT) && tar xvfz $(abspath $<)
+	cd $(TARGET_OUT) && tar jxvf $(abspath $<)
 ifneq ($(EXPORT_DEVICE_PREFS),)
 	cp -n $(EXPORT_DEVICE_PREFS)/*.js $(TARGET_OUT)/b2g/defaults/pref/
 endif
@@ -271,7 +271,7 @@ else
 	export HOST_OS="$(HOST_OS)" && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh) && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh package) && \
-	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.gz $@
+	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.bz2 $@
 endif
 
 .PHONY: buildsymbols
