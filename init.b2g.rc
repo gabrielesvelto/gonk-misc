@@ -73,6 +73,7 @@ on boot
     mkdir /dev/memcg/b2g/bg/try_to_keep
     mkdir /dev/memcg/b2g/default
     # Fine tune b2gkillerd memory config
+    setprop ro.b2gkillerd.debug false
     setprop ro.b2gkillerd.mem_pressure_threshold "3.0"
     setprop ro.b2gkillerd.gc_cc_max "2.5"
     setprop ro.b2gkillerd.gc_cc_min "1.5"

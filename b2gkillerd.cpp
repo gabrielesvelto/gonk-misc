@@ -22,7 +22,12 @@
 
 #ifdef ANDROID
 #include "android/log.h"
-#define LOGB2GKILLER(...) __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__)
+#define LOGB2GKILLER(...)                                                \
+  if (debugging_b2g_killer) {                                            \
+    __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__); \
+  }
+#else
+#define LOGB2GKILLER(...) printf(## __VA_ARGS__)
 #endif
 
 /**
@@ -119,6 +124,8 @@ static double swapped_mem_weight = 0.5;
 
 // Consecutive kicks should be longer than |kMinKickInterval| seconds.
 static double min_kick_interval = 0.5;
+
+static bool debugging_b2g_killer = false;
 
 /**
  * Counting memory pressure with a moving average.
@@ -518,11 +525,11 @@ public:
     FillB2GProcessList(&procs);
     int pid = FindBestProcToKill(&procs);
     if (pid < 0) {
-      printf("There is no any process to kill!\n");
+      LOGB2GKILLER("There is no any process to kill!\n");
       return;
     }
     kill(pid, SIGKILL);
-    printf("Kill pid %d for memory pressure\n", pid);
+    LOGB2GKILLER("Kill pid %d for memory pressure\n", pid);
   }
 };
 
@@ -688,10 +695,10 @@ public:
     auto parent = FindB2GParent();
     if (parent != -1) {
       DoKickGCCC(parent);
-      printf("b2gkillerd has kicked %d\n", parent);
+      LOGB2GKILLER("b2gkillerd has kicked %d\n", parent);
       mLastTm = tm;
     } else {
-      printf("Can not find the parent process of B2G.\n");
+      LOGB2GKILLER("Can not find the parent process of B2G.\n");
     }
   }
 
@@ -708,11 +715,11 @@ void WatchMemPressure() {
   std::unique_ptr<MemPressureCounter> mpcounter =
     std::make_unique<MemPressureCounter>();
 
-  printf("Start watching memory pressure events!\n");
-  printf("The half life of the memory pressure counter is %fs.\n",
-         mpcounter->HalfLifePeriod());
-  printf("Kill processes once the counter is over %f.\n\n",
-         mem_pressure_threshold);
+  LOGB2GKILLER("Start watching memory pressure events!\n");
+  LOGB2GKILLER("The half life of the memory pressure counter is %fs.\n",
+               mpcounter->HalfLifePeriod());
+  LOGB2GKILLER("Kill processes once the counter is over %f.\n\n",
+               mem_pressure_threshold);
 
   MemPressureWatcher watcher;
 
@@ -725,12 +732,8 @@ void WatchMemPressure() {
     bool memory_too_low = mpcounter->Average() > mem_pressure_threshold;
     if (memory_too_low) {
       ProcessKiller::KillOneProc();
-      printf("memory pressure counter %u, average %f\n",
-             cnt, mpcounter->Average());
-#ifdef ANDROID
       LOGB2GKILLER("memory pressure counter %u, average %f\n",
-                   cnt, mpcounter->Average());
-#endif
+                    cnt, mpcounter->Average());
     }
 
     bool do_gc_cc = (mpcounter->Average() >= gc_cc_min &&
@@ -782,6 +785,8 @@ bool CheckCgroups() {
 int
 main() {
   #ifdef ANDROID
+  debugging_b2g_killer = property_get_bool("ro.b2gkillerd.debug", false);
+
   char buf[PROPERTY_VALUE_MAX] = {'\0'};
   property_get("ro.b2gkillerd.mem_pressure_threshold", buf, "3.0");
   mem_pressure_threshold = atof(buf);
