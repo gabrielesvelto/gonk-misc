@@ -1,7 +1,4 @@
 # plugin-container
-type plugin-container, domain;
-type plugin-container_exec, exec_type, file_type;
-
 init_daemon_domain(plugin-container)
 domain_auto_trans(b2g, plugin-container_exec, plugin-container)
 
@@ -22,3 +19,17 @@ allow plugin-container shell_data_file:dir create_dir_perms;
 # other domains interacting with plugin-container domain
 allow mediaserver plugin-container:binder { transfer call };
 allow mediaserver plugin-container:fd use;
+
+# For using widevine level3
+allow plugin-container self:socket { create_socket_perms_no_ioctl listen accept };
+allow plugin-container self:tcp_socket { create_socket_perms_no_ioctl listen accept };
+allow plugin-container self:udp_socket { create_socket_perms_no_ioctl listen accept };
+allow plugin-container self:capability net_raw;
+allow plugin-container b2g:udp_socket write;
+allow plugin-container port:tcp_socket name_connect;
+allow plugin-container device:sock_file w_file_perms;
+allow plugin-container fwmarkd_socket:sock_file write;
+allow plugin-container netd:unix_stream_socket { connectto };
+allow netd plugin-container:tcp_socket { read write setopt getopt };
+allow netd plugin-container:udp_socket { read write setopt getopt };
+allow netd plugin-container:fd use;

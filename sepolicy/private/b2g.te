@@ -1,17 +1,23 @@
 # b2g
-type b2g, domain;
-type b2g_exec, exec_type, file_type;
-
 init_daemon_domain(b2g)
-
 binder_use(b2g)
+hwbinder_use(b2g)
+net_domain(b2g)
+
+binder_call(b2g, audioserver)
+binder_call(audioserver, b2g)
 binder_call(b2g, mediaserver)
 binder_call(mediaserver, b2g)
 binder_call(b2g, plugin-container)
-
-unix_socket_connect(b2g, netd, netd)
-unix_socket_connect(b2g, vold, vold)
-unix_socket_connect(b2g, rild, rild)
+binder_call(b2g, wificond)
+binder_call(wificond, b2g)
+binder_call(b2g, vold)
+binder_call(vold, b2g)
+binder_call(b2g, netd)
+binder_call(netd, b2g)
+binder_call(b2g, init)
+binder_call(b2g, cameraserver)
+binder_call(cameraserver, b2g)
 
 # force SELinux to keep environment variables when calling
 # execve(plugin-container,...) to preserve LD_PRELOAD which is
@@ -29,7 +35,6 @@ file_type_auto_trans(b2g, system_data_file, b2g_data_file)
 
 # audit2allow
 allow b2g adb_keys_file:dir rw_dir_perms;
-allow b2g alarm_device:chr_file w_file_perms;
 allow b2g apk_data_file:dir rw_dir_perms;
 allow b2g apk_private_data_file:dir rw_dir_perms;
 allow b2g app_data_file:dir rw_dir_perms;
@@ -39,7 +44,6 @@ allow b2g audio_data_file:file rw_file_perms;
 allow b2g b2g_exec:file rx_file_perms;
 allow b2g bluetooth_data_file:dir rw_dir_perms;
 allow b2g bluetooth_data_file:file rw_file_perms;
-allow b2g bluetooth_prop:property_service set;
 allow b2g bluetoothd:fd use;
 allow b2g bluetoothd:unix_stream_socket rw_stream_socket_perms;
 allow b2g cache_file:dir create_dir_perms;
@@ -48,18 +52,13 @@ allow b2g camera_data_file:dir rw_dir_perms;
 allow b2g camera_data_file:file rw_file_perms;
 allow b2g camera_data_file:sock_file create_file_perms;
 allow b2g cgroup:dir create_dir_perms;
-allow b2g ctl_default_prop:property_service set;
-allow b2g ctl_dumpstate_prop:property_service set;
-allow b2g ctl_mdnsd_prop:property_service set;
 allow b2g dalvikcache_data_file:dir rw_dir_perms;
-allow b2g dalvikcache_profiles_data_file:dir rw_dir_perms;
 allow b2g default_android_service:service_manager add;
 allow b2g device:chr_file rw_file_perms;
 allow b2g device:dir rw_dir_perms;
 allow b2g device:sock_file w_file_perms;
 allow b2g dhcp_data_file:dir create_dir_perms;
 allow b2g dhcp_data_file:file create_file_perms;
-allow b2g dhcp_prop:property_service set;
 allow b2g dnsproxyd_socket:sock_file write;
 allow b2g drm_data_file:dir rw_dir_perms;
 allow b2g dumpstate:dir create_dir_perms;
@@ -89,7 +88,6 @@ allow b2g keychain_data_file:dir rw_dir_perms;
 allow b2g keychain_data_file:dir rw_dir_perms;
 allow b2g keystore_data_file:dir rw_dir_perms;
 allow b2g keystore_data_file:file r_file_perms;
-allow b2g keystore_service:service_manager add;
 allow b2g lmkd:dir r_dir_perms;
 allow b2g logd:dir r_dir_perms;
 allow b2g logd:file r_file_perms;
@@ -103,44 +101,39 @@ allow b2g media_rw_data_file:file rw_file_perms;
 allow b2g misc_user_data_file:dir rw_dir_perms;
 allow b2g net_data_file:dir rw_dir_perms;
 allow b2g net_data_file:file rw_file_perms;
-allow b2g net_radio_prop:property_service set;
 allow b2g node:tcp_socket { node_bind };
 allow b2g node:udp_socket { node_bind };
 allow b2g port:tcp_socket { name_connect name_bind node_bind };
 allow b2g port:udp_socket { name_bind node_bind };
-allow b2g powerctl_prop:property_service set;
 allow b2g proc_sysrq:file w_file_perms;;
 allow b2g property_data_file:dir rw_dir_perms;
 allow b2g property_data_file:file rw_file_perms;
 allow b2g property_socket:sock_file w_file_perms;
 allow b2g radio_data_file:dir rw_dir_perms;
 allow b2g radio_data_file:file rw_file_perms;
-allow b2g radio_prop:property_service set;
 allow b2g resourcecache_data_file:dir rw_dir_perms;
 allow b2g rilproxy:unix_stream_socket connectto;
-allow b2g sdcard_internal:dir create_dir_perms;
-allow b2g sdcard_internal:file create_file_perms;
-allow b2g security_file:dir rw_dir_perms;
 allow b2g self:binder { transfer call };
-allow b2g self:capability2 { block_suspend syslog };
+allow b2g self:capability2 { block_suspend syslog wake_alarm };
 allow b2g self:capability { sys_boot sys_resource sys_nice sys_ptrace sys_admin sys_module sys_time net_raw net_bind_service net_admin setgid fsetid kill chown setuid fowner dac_override };
 allow b2g self:process { execmem ptrace };
-allow b2g self:socket create_stream_socket_perms;
+allow b2g self:socket { create_socket_perms_no_ioctl listen accept };
 allow b2g self:tcp_socket create_stream_socket_perms;
 allow b2g self:udp_socket create_stream_socket_perms;
-allow b2g self:netlink_kobject_uevent_socket create_stream_socket_perms;
-allow b2g self:netlink_route_socket create_stream_socket_perms;
-allow b2g self:netlink_socket create_stream_socket_perms;
+allow b2g self:netlink_kobject_uevent_socket { create_socket_perms_no_ioctl listen accept };
+allow b2g self:netlink_route_socket { create_socket_perms_no_ioctl listen accept };
+allow b2g self:netlink_socket { create_socket_perms_no_ioctl listen accept };
 allow b2g sensors_device:chr_file getattr;
-#allow b2g sensorsd_exec:file execute;
 allow b2g shared_relro_file:dir rw_dir_perms;
 allow b2g shell_data_file:dir create_dir_perms;
 allow b2g shell_data_file:file create_file_perms;
+allow b2g shell_data_file:sock_file getattr;
 allow b2g socket_device:dir rw_dir_perms;
 allow b2g socket_device:sock_file create_file_perms;
 allow b2g surfaceflinger_service:service_manager add;
-allow b2g sysfs:file w_file_perms;
-allow b2g sysfs_lowmemorykiller:file w_file_perms;
+allow b2g sysfs:file rw_file_perms;
+allow b2g sysfs_lowmemorykiller:dir create_dir_perms;
+allow b2g sysfs_lowmemorykiller:file create_file_perms;
 allow b2g sysfs_wake_lock:file rw_file_perms;
 allow b2g system_data_file:dir create_dir_perms;
 allow b2g system_data_file:file create_file_perms;
@@ -149,8 +142,6 @@ allow b2g system_data_file:fifo_file create_file_perms;
 allow b2g system_file:file rx_file_perms;
 allow b2g system_wpa_socket:sock_file create_file_perms;
 allow b2g systemkeys_data_file:dir rw_dir_perms;
-allow b2g system_prop:property_service set;
-allow b2g system_radio_prop:property_service set;
 allow b2g system_server_service:service_manager add;
 allow b2g tmpfs:dir create_dir_perms;
 allow b2g tombstone_data_file:dir rw_dir_perms;
@@ -163,8 +154,6 @@ allow b2g wifi_data_file:file create_file_perms;
 allow b2g wifi_data_file:sock_file create_file_perms;
 allow b2g wpa_socket:dir rw_dir_perms;
 allow b2g wpa_socket:sock_file create_file_perms;
-allow b2g wpa:unix_dgram_socket sendto;
-allow b2g hostapd:unix_dgram_socket sendto;
 allow b2g zoneinfo_data_file:dir w_dir_perms;
 
 allow b2g bootchart_data_file:dir rw_dir_perms;
@@ -176,8 +165,6 @@ allow b2g storage_file:dir r_dir_perms;
 allow b2g adb_data_file:dir r_dir_perms;
 allow b2g kernel:key search;
 allow b2g perfprofd_data_file:dir w_dir_perms;
-allow b2g log_device:chr_file rw_file_perms;
-allow b2g log_device:dir rw_dir_perms;
 allow b2g adb_data_file:dir rw_dir_perms;
 allow b2g backup_data_file:dir rw_dir_perms;
 allow b2g heapdump_data_file:dir rw_dir_perms;
@@ -191,7 +178,6 @@ allow b2g mnt_user_file:lnk_file r_file_perms;
 allow b2g storage_file:lnk_file r_file_perms;
 
 allow b2g mediaserver_service:service_manager find;
-allow b2g default_prop:property_service set;
 
 allow b2g serial_device:chr_file rw_file_perms;
 allow b2g shell_exec:file rx_file_perms;
@@ -201,10 +187,6 @@ allow b2g nfc_data_file:file create_file_perms;
 allow b2g nfc_device:chr_file rw_file_perms;
 allow b2g nfcd_exec:file rx_file_perms;
 
-allow b2g gpsd_exec:file rx_file_perms;
-allow b2g gpsd:unix_stream_socket connectto;
-
-allow b2g debug_prop:property_service set;
 allow b2g mtp_device:chr_file rw_file_perms;
 allow b2g audio_device:dir rw_dir_perms;
 allow b2g audio_device:chr_file create_file_perms;
@@ -226,19 +208,17 @@ allow b2g vold:dir r_dir_perms;
 allow b2g vold:file r_file_perms;
 
 allow b2g block_device:dir r_dir_perms;
+allow b2g block_device:blk_file r_file_perms;
 allow b2g rtc_device:chr_file rw_file_perms;
-
+#Allow b2g_telephony data collector to connect with metrics-daemon
+allow b2g metrics-daemon:unix_stream_socket connectto;
 allow b2g unlabeled:dir rw_dir_perms;
 allow b2g unlabeled:file rw_file_perms;
 
 # other domains that interact with b2g domain
-
 allow netd b2g:fd use;
 allow netd b2g:tcp_socket { read write setopt getopt };
 allow netd b2g:udp_socket { read write setopt getopt };
-
-allow wpa b2g:unix_dgram_socket sendto;
-allow hostapd b2g:unix_dgram_socket sendto;
 
 allow bluetoothd b2g:unix_stream_socket connectto;
 allow init b2g:binder call;
@@ -254,7 +234,76 @@ allow gatekeeperd b2g:binder call;
 # config tethering IPv6 router mode
 allow b2g proc_net:file write;
 
-#allow sensorsd b2g:unix_stream_socket connectto;
+# config for dongle dhcp
+allow b2g dhcp_data_file:file unlink;
 
-#allow mediaserver b2g:binder { call transfer };
-#allow mediaserver b2g:fd use;
+###new sepolicy add in next
+allow b2g binder_device:chr_file { ioctl open read write };
+allow b2g configfs:dir create_dir_perms;
+allow b2g configfs:file create_file_perms;
+allow b2g hwservicemanager_prop:file rw_file_perms;
+allow b2g hwservicemanager:binder call;
+allow b2g ion_device:chr_file rw_file_perms;
+allow b2g nativetest_data_file:dir r_dir_perms;
+allow b2g nativetest_data_file:file r_file_perms;
+allow b2g proc_modules:file rw_file_perms;
+allow b2g proc_meminfo:file rw_file_perms;
+allow b2g proc_pid_max:file rw_file_perms;
+allow b2g storage_stub_file:dir create_dir_perms;
+allow b2g storage_stub_file:file create_file_perms;
+allow b2g sysfs:dir create_dir_perms;
+allow b2g sysfs_android_usb:dir create_dir_perms;
+allow b2g sysfs_android_usb:file create_file_perms;
+allow b2g sysfs_leds:dir rw_dir_perms;
+allow b2g sysfs_power:file rw_file_perms;
+allow b2g system_data_file:lnk_file create_file_perms;
+allow b2g system_prop:file rw_file_perms;
+allow b2g toolbox_exec:file rwx_file_perms;
+allow b2g trace_data_file:dir r_dir_perms;
+allow b2g unencrypted_data_file:file r_file_perms;
+allow b2g vendor_toolbox_exec:file rwx_file_perms;
+
+allow b2g ashmem_device_service:service_manager find;
+allow b2g audioserver_service:service_manager find;
+allow b2g cameraserver_service:service_manager find;
+allow b2g dnsresolver_service:service_manager find;
+allow b2g hal_configstore_ISurfaceFlingerConfigs:hwservice_manager find;
+allow b2g hal_graphics_allocator_hwservice:hwservice_manager find;
+allow b2g hal_graphics_composer_hwservice:hwservice_manager find;
+allow b2g hal_graphics_mapper_hwservice:hwservice_manager find;
+allow b2g hal_power_hwservice:hwservice_manager find;
+allow b2g hal_sensors_hwservice:hwservice_manager find;
+allow b2g hal_telephony_hwservice:hwservice_manager find;
+allow b2g hal_wifi_hwservice:hwservice_manager find;
+allow b2g hal_wifi_supplicant_hwservice:hwservice_manager find;
+allow b2g netd_service:service_manager find;
+allow b2g vold_service:service_manager find;
+allow b2g wificond_service:service_manager find;
+
+allow b2g ashmemd:binder call;
+allow b2g system_wifi_keystore_hwservice:hwservice_manager add;
+allow b2g hidl_base_hwservice:hwservice_manager add;
+
+get_prop(b2g, exported3_default_prop);
+get_prop(b2g, serialno_prop);
+get_prop(b2g, config_prop);
+get_prop(b2g, persist_debug_prop);
+set_prop(b2g, radio_prop);
+set_prop(b2g, bluetooth_prop);
+set_prop(b2g, ctl_default_prop);
+set_prop(b2g, ctl_dumpstate_prop);
+set_prop(b2g, ctl_mdnsd_prop);
+set_prop(b2g, debug_prop);
+set_prop(b2g, dhcp_prop);
+set_prop(b2g, net_radio_prop);
+set_prop(b2g, powerctl_prop);
+set_prop(b2g, radio_prop);
+set_prop(b2g, default_prop);
+set_prop(b2g, system_prop);
+set_prop(b2g, system_radio_prop);
+set_prop(b2g, exported3_system_prop);
+
+wakelock_use(b2g)
+hal_client_domain(b2g, hal_allocator)
+
+allowxperm b2g self:udp_socket ioctl ~SIOCATMARK;

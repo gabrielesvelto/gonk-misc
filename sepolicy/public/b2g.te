@@ -1,0 +1,3 @@
+# b2g
+type b2g, domain;
+type b2g_exec, exec_type, file_type;

@@ -1,0 +1,2 @@
+/system/bin/imsd                  u:object_r:ims_exec:s0
+/system/bin/QtiTelephonyService   u:object_r:QtiTelephonyService_exec:s0

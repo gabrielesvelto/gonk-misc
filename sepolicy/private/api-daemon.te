@@ -1,29 +1,33 @@
 # api-daemon
-type api-daemon, domain;
-type api-daemon_exec, exec_type, file_type;
-
 init_daemon_domain(api-daemon)
+
+binder_use(api-daemon)
+binder_call(api-daemon, mediaserver)
+binder_call(api-daemon, system_suspend)
+binder_call(api-daemon, hwservicemanager)
+binder_call(mediaserver, api-daemon)
+binder_call(system_suspend, api-daemon)
 
 # audit2allow
 allow api-daemon dnsproxyd_socket:sock_file w_file_perms;
 allow api-daemon fwmarkd_socket:sock_file w_file_perms;
 allow api-daemon property_socket:sock_file w_file_perms;
-allow api-daemon default_prop:property_service set;
 allow api-daemon init:unix_stream_socket connectto;
 allow api-daemon netd:unix_stream_socket connectto;
 allow api-daemon node:udp_socket node_bind;
 allow api-daemon port:udp_socket { name_bind node_bind };
 allow api-daemon node:tcp_socket node_bind;
 allow api-daemon port:tcp_socket { name_bind name_connect };
-allow api-daemon self:capability { sys_boot sys_resource sys_nice sys_admin sys_module sys_time net_raw net_bind_service net_admin setgid fsetid kill chown setuid fowner dac_override };
+allow api-daemon self:capability { sys_boot sys_resource sys_nice sys_admin sys_module sys_time net_raw net_bind_service net_admin setgid fsetid kill chown setuid fowner dac_override dac_read_search };
 allow api-daemon self:capability2 { block_suspend syslog };
 allow api-daemon self:tcp_socket create_stream_socket_perms;
 allow api-daemon self:udp_socket create_stream_socket_perms;
-allow api-daemon self:netlink_route_socket { create_stream_socket_perms nlmsg_read nlmsg_write };
+allow api-daemon self:netlink_route_socket { create_socket_perms_no_ioctl listen accept nlmsg_read nlmsg_write };
 allow api-daemon init:unix_stream_socket connectto;
 allow api-daemon system_data_file:dir create_dir_perms;
 allow api-daemon system_data_file:file { create_file_perms x_file_perms };
 allow api-daemon api-daemon_exec:file rx_file_perms;
+allow api-daemon api-daemon_exec:dir r_dir_perms;
 allow api-daemon api_data_file:file { create_file_perms x_file_perms };
 allow api-daemon api_data_file:dir create_dir_perms;
 allow api-daemon system_file:file rx_file_perms;
@@ -41,15 +45,57 @@ allow api-daemon b2g_data_file:file r_file_perms;
 allow api-daemon domain:dir r_dir_perms;
 allow api-daemon domain:file r_file_perms;
 allow api-daemon domain:lnk_file r_file_perms;
-allow api-daemon domain:process getattr;
-allow api-daemon kernel:system { syslog_read syslog_mod };
+allow api-daemon kernel:system { syslog_read syslog_mod module_request };
+allow api-daemon b2g:process sigkill;
+allow api-daemon self:process { dyntransition setcurrent setexec ptrace sigkill};
+allow api-daemon servicemanager:binder call;
+allow api-daemon mediaserver_service:service_manager find;
 
 # other domains that interact with api-domain
+allow netd api-daemon:{ udp_socket tcp_socket } rw_socket_perms;
+allow netd api-daemon:fd use;
 allow shell api-daemon_exec:file getattr;
 allow kernel api_data_file:file create_file_perms;
-allow netd api-daemon:fd use;
-allow netd api-daemon:tcp_socket rw_socket_perms;
-allow b2g api-daemon_exec:file { write open };
+allow b2g api-daemon_exec:file create_file_perms;
+allow b2g api-daemon_exec:dir rw_dir_perms;
 allow b2g api_data_file:file create_file_perms;
 allow b2g api_data_file:dir create_dir_perms;
 allow b2g api-daemon:unix_stream_socket connectto;
+allow init api-daemon_exec:file { r_file_perms execute };
+allow init api-daemon_exec:dir r_dir_perms;
+
+### for next
+binder_call(api-daemon, hwservicemanager)
+allow api-daemon hal_light_hwservice:hwservice_manager find;
+allow api-daemon nativetest_data_file:dir r_dir_perms;
+allow api-daemon rtc_device:chr_file { ioctl read open };
+allow api-daemon system_data_file:lnk_file create_file_perms;
+allow api-daemon shell_data_file:sock_file create_file_perms;
+allow api-daemon self:capability2 wake_alarm;
+allow api-daemon sysfs_wake_lock:file { open write };
+allow api-daemon sysfs:file w_file_perms;
+allow api-daemon sysfs_leds:dir r_dir_perms;
+allow api-daemon config_gz:file { open read getattr };
+allow api-daemon {
+proc
+proc_buddyinfo
+proc_cmdline
+proc_filesystems
+proc_iomem
+proc_keys
+proc_kmsg
+proc_loadavg
+proc_meminfo
+proc_misc
+proc_modules
+proc_stat
+proc_swaps
+proc_sysrq
+proc_timer
+proc_uptime
+proc_version
+proc_vmstat
+}:file r_file_perms;
+
+get_prop(api-daemon, hwservicemanager_prop);
+set_prop(api-daemon, default_prop);

@@ -1,0 +1,1 @@
+allow api-daemon hal_light_default:binder call;

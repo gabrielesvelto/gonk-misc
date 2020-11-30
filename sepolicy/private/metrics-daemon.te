@@ -1,0 +1,15 @@
+# metrics-daemon
+init_daemon_domain(metrics-daemon)
+
+# audit2allow
+allow metrics-daemon fwmarkd_socket:sock_file w_file_perms;
+allow metrics-daemon netd:unix_stream_socket connectto;
+allow metrics-daemon port:tcp_socket name_connect;
+allow metrics-daemon self:capability net_raw;
+allow metrics-daemon self:tcp_socket create_stream_socket_perms;
+allow metrics-daemon socket_device:dir w_dir_perms;
+allow metrics-daemon socket_device:sock_file create_file_perms;
+
+# other domains that interact with metrics-daemon domain
+allow netd metrics-daemon:fd use;
+allow netd metrics-daemon:tcp_socket rw_socket_perms;

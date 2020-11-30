@@ -1,0 +1,3 @@
+# plugin-container
+type plugin-container, domain;
+type plugin-container_exec, exec_type, file_type;

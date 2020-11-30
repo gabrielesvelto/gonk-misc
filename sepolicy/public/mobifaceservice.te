@@ -1,0 +1,4 @@
+# MobiFaceService
+type mobifaceservice, domain;
+type mobifaceservice_exec, exec_type, file_type;
+type mobiface_data_file, file_type, data_file_type;

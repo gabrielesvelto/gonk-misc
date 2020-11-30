@@ -1,7 +1,0 @@
-# for FOTA permissions in recovery mode, FOTA will check battery power before installation
-# healthd
-recovery_only(`
-allow healthd device:chr_file create_file_perms;
-allow healthd device:dir rw_dir_perms;
-allow healthd self:capability mknod;
-')

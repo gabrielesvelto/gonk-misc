@@ -1,0 +1,3 @@
+# api-daemon
+type api-daemon, domain;
+type api-daemon_exec, exec_type, file_type;

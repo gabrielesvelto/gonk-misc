@@ -1,0 +1,9 @@
+init_daemon_domain(b2gkillerd)
+
+allow b2gkillerd b2g:dir r_dir_perms;
+allow b2gkillerd b2g:file r_file_perms;
+allow b2gkillerd b2g:unix_dgram_socket sendto;
+allow b2gkillerd cgroup:file r_file_perms;
+allow b2gkillerd default_prop:file r_file_perms;
+allow b2gkillerd self:capability { dac_override sys_ptrace };
+allow b2gkillerd socket_device:sock_file rw_file_perms;

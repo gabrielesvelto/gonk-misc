@@ -1,0 +1,13 @@
+# MobiFaceService
+init_daemon_domain(mobifaceservice)
+file_type_auto_trans(mobifaceservice, system_data_file, mobiface_data_file)
+
+#============= mobifaceservice ==============
+allow mobifaceservice b2g:fd use;
+allow mobifaceservice servicemanager:binder { transfer call };
+allow mobifaceservice mobiface_data_file:dir create_dir_perms;
+allow mobifaceservice mobiface_data_file:file create_file_perms;
+
+#============= b2g ==============
+allow b2g mobifaceservice:binder call;
+allow b2g mobifaceservice:fd use;

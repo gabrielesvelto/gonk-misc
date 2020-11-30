@@ -1,7 +1,4 @@
 # gonksched
-type gonksched, domain;
-type gonksched_exec, exec_type, file_type;
-
 init_daemon_domain(gonksched)
 
 binder_use(gonksched)
@@ -14,10 +11,16 @@ allow gonksched mediaserver:process setsched;
 allow gonksched plugin-container:dir search;
 allow gonksched plugin-container:process setsched;
 allow gonksched self:capability sys_nice;
-allow gonksched system_server_service:service_manager add;
+# allow gonksched system_server_service:service_manager add;
 allow gonksched dumpstate:fd use;
 allow gonksched dumpstate:unix_stream_socket rw_socket_perms;
 allow gonksched devpts:chr_file rw_file_perms;
+allow gonksched self:capability dac_override;
 
 # other domains that interact with gonksched domain
+allow audioserver gonksched:binder call;
+allow dumpstate gonksched:binder call;
 allow mediaserver gonksched:binder call;
+
+###for next
+allow gonksched binder_device:chr_file rw_file_perms;

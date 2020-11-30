@@ -19,20 +19,25 @@
 #
 /system/bin/b2g.sh              u:object_r:b2g_exec:s0
 /system/b2g/b2g                 u:object_r:b2g_exec:s0
+/system/bin/b2gkillerd          u:object_r:b2gkillerd_exec:s0
 /system/b2g/plugin-container    u:object_r:plugin-container_exec:s0
 /system/bin/gonksched           u:object_r:gonksched_exec:s0
+/system/bin/gonkservices        u:object_r:gonkservices_exec:s0
 /system/bin/rilproxy            u:object_r:rilproxy_exec:s0
 /system/bin/fakeappops          u:object_r:fakeappops_exec:s0
 /system/bin/bluetoothd          u:object_r:bluetoothd_exec:s0
 /system/bin/nfcd                u:object_r:nfcd_exec:s0
 /system/bin/pnscr               u:object_r:nfcd_exec:s0
 /system/bin/secnfc              u:object_r:nfcd_exec:s0
-/system/bin/gps_test            u:object_r:gpsd_exec:s0
+#/system/bin/gps_test            u:object_r:gpsd_exec:s0
 #/system/bin/sensorsd            u:object_r:sensorsd_exec:s0
 
 #############################
 # KaiOS Daemon
 #
+##############################
+## KaiOS Daemon
+##
 /data/local/service(/.*)?       u:object_r:api_data_file:s0
 /system/kaios/api-daemon        u:object_r:api-daemon_exec:s0
 /system/bin/api-daemon.sh       u:object_r:api-daemon_exec:s0
@@ -40,3 +45,11 @@
 /system/bin/updater-daemon.sh   u:object_r:api-daemon_exec:s0
 /system/kaios/updater-daemon    u:object_r:api-daemon_exec:s0
 /data/local/service/updater/updater-daemon  u:object_r:api-daemon_exec:s0
+/data/local/service/api-daemon/remote  u:object_r:child-daemon_exec:s0
+/system/kaios/metrics_daemon    u:object_r:metrics-daemon_exec:s0
+#
+##############################
+## Third party services
+##
+/system/bin/MobiFace(/.*)?      u:object_r:mobifaceservice_exec:s0
+/data/MobiFace(/.*)?            u:object_r:mobiface_data_file:s0

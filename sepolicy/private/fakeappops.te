@@ -1,19 +1,22 @@
 # fakeappops
-type fakeappops, domain;
-type fakeappops_exec, exec_type, file_type;
-
 init_daemon_domain(fakeappops)
 
 binder_use(fakeappops)
 
 # audit2allow
 # allow fakeappops init:binder { transfer call };
-allow fakeappops system_server_service:service_manager add;
+# allow fakeappops system_server_service:service_manager add;
 allow fakeappops self:capability sys_nice;
 allow fakeappops dumpstate:fd use;
 allow fakeappops dumpstate:unix_stream_socket { rw_socket_perms };
 allow fakeappops devpts:chr_file rw_file_perms;
+allow fakeappops self:capability dac_override;
 
 # other domains that interact with fakeappops domain
+allow cameraserver fakeappops:binder { call transfer };
 allow mediaserver fakeappops:binder { transfer call };
 allow dumpstate fakeappops:binder call;
+
+###for next
+allow fakeappops binder_device:chr_file rw_file_perms;
+allow audioserver fakeappops:binder { call transfer };

@@ -1,3 +1,0 @@
-#============= b2g ==============
-allow b2g ss_file:dir rw_dir_perms;
-allow b2g ss_file:file rw_file_perms;

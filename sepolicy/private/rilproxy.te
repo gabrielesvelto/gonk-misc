@@ -1,15 +1,8 @@
 # rilproxy
-type rilproxy, domain;
-type rilproxy_exec, exec_type, file_type;
-
 init_daemon_domain(rilproxy)
 
-unix_socket_connect(rilproxy, rild, rild)
-
 # audit2allow
-allow rilproxy log_device:chr_file w_file_perms;
 allow rilproxy self:capability setuid;
 allow rilproxy socket_device:dir w_dir_perms;
 allow rilproxy socket_device:sock_file create_file_perms;
-allow rilproxy log_device:dir search;
 allow rilproxy socket_device:lnk_file unlink;

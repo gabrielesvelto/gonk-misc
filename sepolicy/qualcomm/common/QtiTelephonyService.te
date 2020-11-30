@@ -1,0 +1,6 @@
+type QtiTelephonyService, domain;
+type QtiTelephonyService_exec, exec_type, file_type;
+
+init_daemon_domain(QtiTelephonyService)
+
+get_prop(QtiTelephonyService, hwservicemanager_prop)

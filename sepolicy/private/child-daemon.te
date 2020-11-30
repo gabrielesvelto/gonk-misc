@@ -1,0 +1,51 @@
+# child-daemon
+typebounds api-daemon child-daemon;
+typebounds api-daemon_exec child-daemon_exec;
+
+init_daemon_domain(child-daemon)
+
+binder_use(child-daemon)
+binder_call(child-daemon, mediaserver)
+binder_call(mediaserver, child-daemon)
+
+# audit2allow
+# need to check why sys_ptrace is needed
+allow child-daemon self:capability { dac_override dac_read_search setuid setgid fsetid net_raw };
+allow child-daemon self:process ptrace;
+allow child-daemon self:tcp_socket create_stream_socket_perms;
+allow child-daemon self:udp_socket create_stream_socket_perms;
+allow child-daemon shell_data_file:dir create_dir_perms;
+allow child-daemon shell_data_file:file create_file_perms;
+allow child-daemon servicemanager:binder call;
+allow child-daemon dnsproxyd_socket:sock_file w_file_perms;
+allow child-daemon fwmarkd_socket:sock_file w_file_perms;
+allow child-daemon node:udp_socket node_bind;
+allow child-daemon port:udp_socket { name_bind node_bind };
+allow child-daemon node:tcp_socket node_bind;
+allow child-daemon port:tcp_socket { name_bind name_connect };
+allow child-daemon netd:unix_stream_socket connectto;
+
+allow child-daemon api-daemon:unix_dgram_socket { read write };
+allow child-daemon api-daemon:process sigchld;
+allow child-daemon api-daemon_exec:dir search;
+allow child-daemon api-daemon:unix_dgram_socket ioctl;
+allow child-daemon api-daemon:fd use;
+allow child-daemon api_data_file:dir r_dir_perms;
+allow child-daemon api_data_file:file rx_file_perms;
+allow child-daemon system_data_file:file rx_file_perms;
+allow child-daemon domain:dir r_dir_perms;
+allow child-daemon domain:file r_file_perms;
+allow child-daemon mediaserver_service:service_manager find;
+
+# other domains that interact with child-daemon domain
+allow api-daemon child-daemon:process { dyntransition setcurrent setexec sigkill };
+allow api-daemon child-daemon_exec:file rx_file_perms;
+allow api-daemon child-daemon_exec:dir r_dir_perms;
+allow b2g child-daemon_exec:file rw_file_perms;
+allow b2g child-daemon_exec:dir rw_dir_perms;
+allow b2g child-daemon:unix_stream_socket connectto;
+allow init child-daemon_exec:file { r_file_perms execute };
+allow init child-daemon_exec:dir r_dir_perms;
+allow netd child-daemon:{ udp_socket tcp_socket } { read write setopt getopt };
+allow netd child-daemon:fd use;
+allow shell child-daemon_exec:file getattr;

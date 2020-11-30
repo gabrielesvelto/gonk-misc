@@ -1,4 +1,0 @@
-# Netd binder command
-allow netd init:binder call;
-allow netd init:tcp_socket {read write getopt setopt};
-

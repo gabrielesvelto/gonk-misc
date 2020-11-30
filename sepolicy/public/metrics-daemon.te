@@ -1,0 +1,3 @@
+# metrics-daemon
+type metrics-daemon, domain;
+type metrics-daemon_exec, exec_type, file_type;

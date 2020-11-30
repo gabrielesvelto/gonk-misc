@@ -1,13 +1,11 @@
 # The external/sepolicy/kaios_sepolicy.mk is a kaios sepolicy enabler
-ifeq ($(KAIOS_SEPOLICY_ENABLED),true)
-BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/common
+
+B2G_SEPOLICY_ENABLED=true
+ifeq ($(B2G_SEPOLICY_ENABLED),true)
+BOARD_PLAT_PUBLIC_SEPOLICY_DIR += gonk-misc/sepolicy/public
+BOARD_PLAT_PRIVATE_SEPOLICY_DIR += gonk-misc/sepolicy/private
+BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/vendor
 ifeq ($(call is-vendor-board-platform,QCOM),true)
-BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/qualcomm
-endif
-ifeq ("$(PRODUCT_MANUFACTURER)", "SPRD")
-BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/spreadtrum/common
-ifeq ($(strip $(BOARD_TEE_CONFIG)),trusty)
-BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/spreadtrum/tee
-endif
+BOARD_SEPOLICY_DIRS += gonk-misc/sepolicy/qualcomm/common
 endif
 endif

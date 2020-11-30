@@ -1,0 +1,2 @@
+allow b2g self:netlink_generic_socket { create_socket_perms_no_ioctl listen accept };
+allow b2g self:system module_load;

@@ -1,0 +1,3 @@
+# nfcd
+type nfcd, domain;
+type nfcd_exec, exec_type, file_type;
