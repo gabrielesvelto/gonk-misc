@@ -54,7 +54,7 @@ if [ -z "$B2G_DIR" ]; then
 fi
 
 EMULATOR=`getprop ro.kernel.qemu`
-if [ "$EMULATOR" == "1" -a ! -d /system/b2g ]; then
+if [ "$EMULATOR" == "1" -a ! -f "$B2G_DIR/b2g" ]; then
   log -p E "Empty emulator detected not starting b2g."
   setprop sys.boot_completed 1
   exit 1
