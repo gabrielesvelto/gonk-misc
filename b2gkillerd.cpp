@@ -411,7 +411,7 @@ private:
   }
 
   void add_proc(int aPid) {
-    ASSERT(HasProc(aPid), "add an existing process");
+    ASSERT(!HasProc(aPid), "add an existing process");
     mProcs.push_back(ProcessInfo(aPid));
   }
 };
