@@ -631,7 +631,7 @@ class GCCCKicker {
       FILE *commfp = fopen(comm, "r");
       if (commfp == nullptr) continue;
       if (getline(&comm, &commsz, commfp) <= 0) continue;
-      if (strcmp(comm, "MainThread\n")) continue;
+      if (strcmp(comm, "b2g\n")) continue;
       // The B2G parent process
       parent = pid;
       break;
