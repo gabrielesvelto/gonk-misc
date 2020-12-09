@@ -240,6 +240,7 @@ endif
 ifeq ($(IME_ENGINE), touchpal)
 GECKO_LIB_DEPS += libtouchpal.so
 endif
+PRODUCTION_OS_NAME ?= KAIOS
 
 .PHONY: $(LOCAL_BUILT_MODULE)
 $(LOCAL_BUILT_MODULE): $(TARGET_CRTBEGIN_DYNAMIC_O) $(TARGET_CRTEND_O) $(addprefix $(TARGET_OUT_SHARED_LIBRARIES)/,$(GECKO_LIB_DEPS)) $(GECKO_LIB_STATIC)
@@ -247,7 +248,7 @@ ifeq ($(USE_PREBUILT_B2G),1)
 	@echo -e "\033[0;33m ==== Use prebuilt gecko ==== \033[0m";
 	mkdir -p $(@D) && cp $(abspath $(PREFERRED_B2G)) $@
 else
-	echo "export GECKO_OBJDIR=$(abspath $(GECKO_OBJDIR))"; \
+	(echo "export GECKO_OBJDIR=$(abspath $(GECKO_OBJDIR))"; \
 	echo "export GONK_PRODUCT_NAME=$(TARGET_DEVICE)"; \
 	echo "export GONK_PATH=$(abspath .)"; \
 	echo "export PLATFORM_VERSION=$(PLATFORM_SDK_VERSION)"; \
@@ -257,6 +258,8 @@ else
 	echo "export PRODUCT_MANUFACTURER=$(PRODUCT_MANUFACTURER)"; \
 	echo "export MOZ_DISABLE_LTO=$(MOZ_DISABLE_LTO)"; \
 	echo "export HOST_OS=$(HOST_OS)";	\
+	echo "export PRODUCTION_OS_NAME=$(PRODUCTION_OS_NAME)"; \
+	) > .var.profile
 	unset CC_WRAPPER && unset CXX_WRAPPER && \
 	export GECKO_OBJDIR="$(abspath $(GECKO_OBJDIR))" && \
 	export GONK_PATH="$(abspath .)" && \
@@ -269,6 +272,7 @@ else
 	export MOZ_DISABLE_LTO="$(MOZ_DISABLE_LTO)" && \
 	export MOZ_SANDBOX_GPU_NODE="$(MOZ_SANDBOX_GPU_NODE)" && \
 	export HOST_OS="$(HOST_OS)" && \
+	export PRODUCTION_OS_NAME="$(PRODUCTION_OS_NAME)" && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh) && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh package) && \
 	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.bz2 $@
