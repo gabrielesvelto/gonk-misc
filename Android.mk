@@ -134,6 +134,16 @@ LOCAL_SRC_FILES	   := b2gkillerd.cpp
 LOCAL_SHARED_LIBRARIES := libcutils liblog
 include $(BUILD_EXECUTABLE)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := gfxdebugger
+LOCAL_MODULE_TAGS  := optional
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_SRC_FILES := gfxdebugger.cpp
+LOCAL_SHARED_LIBRARIES := libbinder libutils
+
+LOCAL_C_INCLUDES := gecko/widget/gonk
+include $(BUILD_EXECUTABLE)
+
 #
 # Gecko glue
 #
