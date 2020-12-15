@@ -37,7 +37,7 @@ service api-daemon /system/bin/api-daemon /system/api-daemon/config.toml
 service b2gkillerd /system/bin/b2gkillerd
     class core
     user root
-    critical
+    disabled
     writepid /dev/cpuset/system-background/tasks
 
 on post-fs-data
@@ -81,3 +81,5 @@ on boot
     setprop ro.b2gkillerd.swapped_mem_weight "0.5"
     setprop ro.b2gkillerd.min_kick_interval "0.5"
 
+on property:sys.boot_completed=1
+    start b2gkillerd
