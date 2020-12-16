@@ -216,6 +216,7 @@ GECKO_LIB_DEPS := \
 	dnsresolver_aidl_interface-V2-cpp.so \
 	binder_b2g_connectivity_interface-cpp.so \
 	binder_b2g_telephony_interface-cpp.so \
+	binder_b2g_remotesimunlock_interface-cpp.so \
 	libc++.so \
 	libbinder.so \
 	libfmq.so \
