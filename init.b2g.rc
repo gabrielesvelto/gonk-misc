@@ -74,12 +74,12 @@ on boot
     mkdir /dev/memcg/b2g/default
     # Fine tune b2gkillerd memory config
     setprop ro.b2gkillerd.debug false
-    setprop ro.b2gkillerd.mem_pressure_threshold "3.0"
-    setprop ro.b2gkillerd.gc_cc_max "2.5"
-    setprop ro.b2gkillerd.gc_cc_min "1.5"
+    setprop ro.b2gkillerd.mem_pressure_threshold "60"
+    setprop ro.b2gkillerd.gc_cc_max "59"
+    setprop ro.b2gkillerd.gc_cc_min "50"
     setprop ro.b2gkillerd.dirty_mem_weight "0.2"
     setprop ro.b2gkillerd.swapped_mem_weight "0.5"
-    setprop ro.b2gkillerd.min_kick_interval "0.5"
+    setprop ro.b2gkillerd.min_kick_interval "5.5"
 
 on property:sys.boot_completed=1
     start b2gkillerd
