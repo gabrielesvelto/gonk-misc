@@ -6,6 +6,7 @@ PRODUCT_PACKAGES += \
 	b2g.sh \
 	b2gkillerd \
 	fakeappops \
+	gfxdebugger \
 	gonksched \
 	gonkservices \
 	init.b2g.rc \
