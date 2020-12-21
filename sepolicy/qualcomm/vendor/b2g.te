@@ -1,0 +1,14 @@
+unix_socket_connect(b2g, rild, rild)
+
+allow b2g sysfs_battery_supply:dir create_dir_perms;
+allow b2g sysfs_battery_supply:file create_file_perms;
+allow b2g sysfs_graphics:dir create_dir_perms;
+allow b2g sysfs_graphics:file create_file_perms;
+allow b2g sysfs_usb_supply:dir create_dir_perms;
+allow b2g sysfs_usb_supply:file create_file_perms;
+allow b2g vendor_audio_prop:file rw_file_perms;
+
+binder_call(b2g, ims)
+binder_call(ims, b2g)
+binder_call(b2g, rild)
+binder_call(rild, b2g)
