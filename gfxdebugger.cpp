@@ -108,10 +108,10 @@ int cmd_gralloc(int argc, char **argv) {
           rc = select(sock + 1, &read_fds, NULL, NULL, NULL);
           if (FD_ISSET(sock, &read_fds)) {
             size_t recv_size = recv(sock, buffer, sizeof(buffer), 0);
-            LOGD("received %d bytes", recv_size);
+            LOGD("received %zu bytes", recv_size);
             Parcel p2;
             p2.setData(buffer, recv_size);
-            LOGD("parcel size: %d\n", p2.dataSize());
+            LOGD("parcel size: %zu\n", p2.dataSize());
             LOGD("output file: %s\n", p2.readCString());
           }
         } else {
@@ -133,15 +133,15 @@ int cmd_gralloc(int argc, char **argv) {
         rc = select(sock + 1, &read_fds, NULL, NULL, NULL);
         if (FD_ISSET(sock, &read_fds)) {
           size_t recv_size = recv(sock, buffer, sizeof(buffer), 0);
-          LOGD("received %d bytes", recv_size);
+          LOGD("received %zu bytes", recv_size);
           Parcel reply;
           reply.setData(buffer, recv_size);
-          LOGD("parcel size: %d\n", reply.dataSize());
+          LOGD("parcel size: %zu\n", reply.dataSize());
 
           uint_t gb_amount = reply.readUint32();
-          LOGD("gb_amount: %d\n", gb_amount);
+          LOGD("gb_amount: %u\n", gb_amount);
           for (int i = 0; i < gb_amount; i++) {
-              LOGD("gralloc: index=%llu", reply.readInt64());
+              LOGD("gralloc: index=%u", reply.readUint32());
           }
         }
         break;
@@ -195,11 +195,11 @@ int cmd_screencap(int argc, char **argv) {
           rc = select(sock + 1, &read_fds, NULL, NULL, NULL);
           if (FD_ISSET(sock, &read_fds)) {
             size_t recv_size = recv(sock, buffer, sizeof(buffer), 0);
-            LOGD("received %d bytes", recv_size);
+            LOGD("received %zu bytes", recv_size);
             Parcel p2;
             p2.setData(buffer, recv_size);
-            LOGD("parcel size: %d\n", p2.dataSize());
-            LOGD("screencap result: %d\n", p2.readUint32());
+            LOGD("parcel size: %zu\n", p2.dataSize());
+            LOGD("screencap result: %u\n", p2.readUint32());
           }
         } else {
           LOGE("[screencap] value for option p is null");
