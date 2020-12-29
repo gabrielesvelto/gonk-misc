@@ -1,0 +1,3 @@
+type b2g_connectivity_wifi_binder_service, service_manager_type;
+type b2g_connectivity_binder_service, service_manager_type;
+type b2g_datacall_binder_service, service_manager_type;

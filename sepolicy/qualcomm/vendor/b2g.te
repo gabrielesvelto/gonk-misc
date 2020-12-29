@@ -51,6 +51,8 @@ allow b2g wpa_data_file:sock_file create_file_perms;
 set_prop(b2g, fm_prop)
 set_prop(b2g, vendor_audio_prop)
 
+binder_call(b2g, cnefwk)
+binder_call(cnefwk, b2g)
 binder_call(b2g, ims)
 binder_call(ims, b2g)
 binder_call(b2g, rild)

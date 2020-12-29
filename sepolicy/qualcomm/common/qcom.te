@@ -80,6 +80,7 @@ get_prop(mediametrics, vendor_audio_prop);
 
 #============= netmgrd ==============
 #allow netmgrd vendor_default_prop:property_service set;
+allow netmgrd self:capability kill;
 
 #============= qti_init_shell ==============
 allow qti_init_shell configfs:dir create_dir_perms;
@@ -111,9 +112,9 @@ allow vendor_init traced_enabled_prop:property_service set;
 #allow vm_bms default_prop:file { getattr open read };
 
 #============= wcnss_service ==============
-#allow wcnss_service system_prop:file r_file_perms;
-#allow wcnss_service serialno_prop:file r_file_perms;
 #allow wcnss_service wifi_data_file:dir r_dir_perms;
+#get_prop(wcnss_service, serialno_prop);
+#get_prop(wcnss_service, system_prop);
 allow wcnss_service property_socket:sock_file write;
 allow wcnss_service init:unix_stream_socket connectto;
 #allow wcnss_service system_prop:file { getattr open read };

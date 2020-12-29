@@ -11,7 +11,7 @@ allow gonksched mediaserver:process setsched;
 allow gonksched plugin-container:dir search;
 allow gonksched plugin-container:process setsched;
 allow gonksched self:capability sys_nice;
-# allow gonksched system_server_service:service_manager add;
+allow gonksched system_server_service:service_manager add;
 allow gonksched dumpstate:fd use;
 allow gonksched dumpstate:unix_stream_socket rw_socket_perms;
 allow gonksched devpts:chr_file rw_file_perms;
