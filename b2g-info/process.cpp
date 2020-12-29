@@ -303,25 +303,6 @@ Process::get_int_file(const char* name)
   return str_to_int(buf, -1);
 }
 
-int
-Process::oom_score()
-{
-  return get_int_file("oom_score");
-}
-
-int
-Process::oom_score_adj()
-{
-  return get_int_file("oom_score_adj");
-}
-
-int
-Process::oom_adj()
-{
-  return get_int_file("oom_adj");
-}
-
-
 void
 Process::ensure_got_meminfo()
 {
@@ -409,6 +390,52 @@ Process::swap_kb()
 {
   ensure_got_meminfo();
   return m_swap_kb;
+}
+
+// Currently, we have 3 types, they are "bg", "bg/try_to_keep" and "fg".
+#define PRIORITY_TYPES 3
+
+const string&
+Process::priority()
+{
+  const char* type[PRIORITY_TYPES] = {"bg", "bg/try_to_keep", "fg"};
+  char filename[64];
+  m_priority = "unknown";
+
+  // The list we don't assign specical priority
+  if (m_name == "b2g" ||
+      m_name == "api-daemon" ||
+      m_name == "updater-daemon" ||
+      m_name == "forkserver") {
+    m_priority = "default";
+  }
+
+  for (int i = 0; i < PRIORITY_TYPES; i++) {
+    if (m_priority != "unknown") {
+      break;
+    }
+
+    snprintf(filename, sizeof(filename), "/dev/memcg/b2g/%s/cgroup.procs", type[i]);
+
+    FILE *f = fopen(filename, "r");
+    if (!f) {
+      continue;
+    }
+
+    char line[64];
+    pid_t pid;
+    while(fgets(line, sizeof(line), f)) {
+      if (sscanf(line, "%d", &pid) == 1) {
+        if (pid == m_pid) {
+          m_priority = type[i];
+          break;
+        }
+      }
+    }
+    fclose(f);
+  }
+
+  return m_priority;
 }
 
 const string&

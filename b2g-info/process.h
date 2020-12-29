@@ -104,9 +104,6 @@ public:
    */
   const std::string& exe();
   bool exe_exist();
-  int oom_adj();
-  int oom_score_adj();
-  int oom_score();
 
   void set_lite_meminfo(bool lite) { m_lite_meminfo = lite; }
 
@@ -125,6 +122,7 @@ public:
   int swap_kb();
   double swap_mb() { return kb_to_mb(swap_kb()); }
 
+  const std::string& priority();
   const std::string& user();
 
 private:
@@ -149,5 +147,6 @@ private:
   int m_uss_kb;
   int m_swap_kb;
 
+  std::string m_priority;
   std::string m_user;
 };

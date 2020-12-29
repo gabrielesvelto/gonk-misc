@@ -258,69 +258,6 @@ void print_system_meminfo(bool show_zram_info)
   t.print_with_indent(2);
 }
 
-void print_lmk_params()
-{
-#define LMK_DIR "/sys/module/lowmemorykiller/parameters/"
-
-  puts("Low-memory killer parameters:\n");
-
-  int notify_pages = str_to_int(read_whole_file(LMK_DIR "notify_trigger"), -1);
-  int notify_trigger_active = str_to_int(read_whole_file("/sys/kernel/mm/lowmemkiller/notify_trigger_active"), -1);
-
-  Table table;
-
-  table.start_row();
-  table.add("notify_trigger");
-  table.add_fmt("%d KB", pages_to_kb(notify_pages));
-  table.start_row();
-  table.add("notify_trigger_active");
-  table.add_fmt("%d   ", notify_trigger_active);
-  table.start_row();
-  table.print_with_indent(2);
-
-  vector<int> oom_adjs;
-  {
-    stringstream ss(read_whole_file(LMK_DIR "adj"));
-    string item;
-    while (getline(ss, item, ',')) {
-      oom_adjs.push_back(str_to_int(item, -1));
-    }
-  }
-
-  vector<int> minfrees;
-  {
-    stringstream ss(read_whole_file(LMK_DIR "minfree"));
-    string item;
-    while (getline(ss, item, ',')) {
-      minfrees.push_back(pages_to_kb(str_to_int(item, -1)));
-    }
-  }
-
-  Table t;
-  t.start_row();
-  t.add("oom_score_adj");
-  t.add("min_free", Table::ALIGN_LEFT);
-
-  for (size_t i = 0; i < max(oom_adjs.size(), minfrees.size()); i++) {
-    t.start_row();
-    if (i < oom_adjs.size()) {
-      t.add(oom_adjs[i]);
-    } else {
-      t.add("");
-    }
-
-    if (i < minfrees.size()) {
-      t.add_fmt("%d KB", minfrees[i]);
-    } else {
-      t.add("");
-    }
-  }
-
-  t.print_with_indent(2);
-
-#undef LMK_DIR
-}
-
 void
 b2g_ps_add_table_headers(Table& t, bool show_threads)
 {
@@ -335,8 +272,7 @@ b2g_ps_add_table_headers(Table& t, bool show_threads)
   t.add("RSS");
   t.add("SWAP");
   t.add("VSIZE");
-  t.add("ADJ");
-  t.add("SCORE_ADJ");
+  t.add("PRIORITY");
   t.add("USER", Table::ALIGN_LEFT);
 }
 
@@ -375,8 +311,7 @@ print_b2g_info(bool show_threads, bool show_zram_info)
     t.add_fmt("%0.1f", p->rss_mb());
     t.add_fmt("%0.1f", p->swap_mb());
     t.add_fmt("%0.1f", p->vsize_mb());
-    t.add(p->oom_adj());
-    t.add(p->oom_score_adj());
+    t.add(p->priority());
     t.add(p->user(), Table::ALIGN_LEFT);
 
     if (show_threads) {
@@ -404,8 +339,6 @@ print_b2g_info(bool show_threads, bool show_zram_info)
 
   print_system_meminfo(show_zram_info);
   putchar('\n');
-
-  print_lmk_params();
 
   return 0;
 }
