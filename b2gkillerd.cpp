@@ -22,12 +22,14 @@
 
 #ifdef ANDROID
 #include "android/log.h"
-#define LOGB2GKILLER(...)                                                \
+#define LOGD(...)                                                \
   if (debugging_b2g_killer) {                                            \
     __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__); \
   }
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__);
 #else
-#define LOGB2GKILLER(...) printf(## __VA_ARGS__)
+#define LOGD(...) printf(## __VA_ARGS__)
+#define LOGI(...) printf(## __VA_ARGS__)
 #endif
 
 /**
@@ -525,11 +527,11 @@ public:
     FillB2GProcessList(&procs);
     int pid = FindBestProcToKill(&procs);
     if (pid < 0) {
-      LOGB2GKILLER("There is no any process to kill!\n");
+      LOGD("There is no any process to kill!\n");
       return;
     }
     kill(pid, SIGKILL);
-    LOGB2GKILLER("Kill pid %d for memory pressure\n", pid);
+    LOGI("Kill pid %d for memory pressure\n", pid);
   }
 };
 
@@ -695,10 +697,10 @@ public:
     auto parent = FindB2GParent();
     if (parent != -1) {
       DoKickGCCC(parent);
-      LOGB2GKILLER("b2gkillerd has kicked %d\n", parent);
+      LOGI("b2gkillerd has kicked %d\n", parent);
       mLastTm = tm;
     } else {
-      LOGB2GKILLER("Can not find the parent process of B2G.\n");
+      LOGD("Can not find the parent process of B2G.\n");
     }
   }
 
@@ -715,10 +717,10 @@ void WatchMemPressure() {
   std::unique_ptr<MemPressureCounter> mpcounter =
     std::make_unique<MemPressureCounter>();
 
-  LOGB2GKILLER("Start watching memory pressure events!\n");
-  LOGB2GKILLER("The half life of the memory pressure counter is %fs.\n",
+  LOGD("Start watching memory pressure events!\n");
+  LOGD("The half life of the memory pressure counter is %fs.\n",
                mpcounter->HalfLifePeriod());
-  LOGB2GKILLER("Kill processes once the counter is over %f.\n\n",
+  LOGD("Kill processes once the counter is over %f.\n\n",
                mem_pressure_threshold);
 
   MemPressureWatcher watcher;
@@ -732,7 +734,7 @@ void WatchMemPressure() {
     bool memory_too_low = mpcounter->Average() > mem_pressure_threshold;
     if (memory_too_low) {
       ProcessKiller::KillOneProc();
-      LOGB2GKILLER("memory pressure counter %u, average %f\n",
+      LOGD("memory pressure counter %u, average %f\n",
                     cnt, mpcounter->Average());
     }
 
@@ -806,7 +808,7 @@ main() {
   property_get("ro.b2gkillerd.min_kick_interval", buf, "0.5");
   min_kick_interval = atof(buf);
 
-  LOGB2GKILLER("Reading config: mem_pressure_threshold: %f, gc_cc_max: %f,"
+  LOGD("Reading config: mem_pressure_threshold: %f, gc_cc_max: %f,"
                "gc_cc_min: %f, dirty_mem_weight: %f, swapped_mem_weight: %f,"
                "minkickinterval: %f \n", mem_pressure_threshold, gc_cc_max,
                gc_cc_min, dirty_mem_weight, swapped_mem_weight, min_kick_interval);
