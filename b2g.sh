@@ -103,5 +103,6 @@ echo $$ > /dev/memcg/b2g/default/cgroup.procs
 
 # When app process sandbox is on, we should terminate the app process when some system calls are not allowed.
 export MOZ_SANDBOX_CRASH_ON_ERROR="1"
+export MOZ_SANDBOX_ERROR="1"
 
 exec $COMMAND_PREFIX "$B2G_DIR/b2g"
