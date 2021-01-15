@@ -81,5 +81,5 @@ on boot
     setprop ro.b2gkillerd.swapped_mem_weight "0.5"
     setprop ro.b2gkillerd.min_kick_interval "5.5"
 
-on property:sys.boot_completed=1
+on property:shell.ready=1
     start b2gkillerd
