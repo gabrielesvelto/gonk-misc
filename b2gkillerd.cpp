@@ -1,4 +1,5 @@
 #include <cutils/properties.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
@@ -27,9 +28,11 @@
     __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__); \
   }
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "b2gkillerd", ## __VA_ARGS__);
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "b2gkillerd", ## __VA_ARGS__);
 #else
 #define LOGD(...) printf(## __VA_ARGS__)
 #define LOGI(...) printf(## __VA_ARGS__)
+#define LOGE(...) fprintf(stderr, ## __VA_ARGS__)
 #endif
 
 /**
@@ -77,8 +80,8 @@
 
 #define ASSERT(x, msg) do { \
     if (!(x)) { \
-      fprintf(stderr, "ASSERT! ERROR: %s : %s:%d\n", \
-              (msg), __FILE__, __LINE__); abort(); \
+      LOGE("ASSERT! ERROR: %s : %s:%d\n", \
+           (msg), __FILE__, __LINE__); abort(); \
     } \
   } while (0)
 
@@ -103,6 +106,8 @@
 // new_value = old_value * EMA_FACTOR_DFL ^ n-seconds
 #define EMA_FACTOR_DFL 0.1
 #define PRESSURE_LEVEL "medium"
+#define MEMINFO_PATH "/proc/meminfo"
+#define MEMINFO_FIELD_COUNT 9
 
 static double mem_pressure_threshold = 3.0;
 
@@ -124,10 +129,120 @@ static double dirty_mem_weight = 0.2;
   */
 static double swapped_mem_weight = 0.5;
 
+
+// High swapped mem weight.
+static double high_swapped_mem_weight = 1.5;
+
 // Consecutive kicks should be longer than |kMinKickInterval| seconds.
 static double min_kick_interval = 0.5;
 
+// Available swap free threshold.
+static double swap_free_threshold = 0.25;
+
 static bool debugging_b2g_killer = false;
+
+union meminfo {
+  struct {
+    int64_t nr_free_pages;
+    int64_t cached;
+    int64_t swap_cached;
+    int64_t buffers;
+    int64_t shmem;
+    int64_t unevictable;
+    int64_t total_swap;
+    int64_t free_swap;
+    int64_t dirty;
+  } field;
+  int64_t arr[MEMINFO_FIELD_COUNT];
+};
+
+static const char* field_names[MEMINFO_FIELD_COUNT] = {
+  "MemFree:",
+  "Cached:",
+  "SwapCached:",
+  "Buffers:",
+  "Shmem:",
+  "Unevictable:",
+  "SwapTotal:",
+  "SwapFree:",
+  "Dirty:",
+};
+
+enum field_match_result {
+  NO_MATCH,
+  PARSE_FAIL,
+  PARSE_SUCCESS
+};
+
+static bool ParseInt64(const char* str, int64_t* ret) {
+  char* endptr;
+  long long val = strtoll(str, &endptr, 10);
+  if (str == endptr) {
+    return false;
+  }
+  *ret = (int64_t)val;
+  return true;
+}
+
+static enum field_match_result MatchField(const char* cp, const char* ap,
+                                          const char* const field_names[],
+                                          int field_count, int64_t* field,
+                                          int *field_idx) {
+  int i;
+  for (i = 0; i < field_count; i++) {
+    if (!strcmp(cp, field_names[i])) {
+      *field_idx = i;
+      return ParseInt64(ap, field) ? PARSE_SUCCESS : PARSE_FAIL;
+    }
+  }
+  return NO_MATCH;
+}
+
+static bool MemInfoParseLine(char *line, union meminfo *mi) {
+  char *cp = line;
+  char *ap;
+  char *save_ptr;
+  int64_t val;
+  int field_idx;
+  enum field_match_result match_res;
+  cp = strtok_r(line, " ", &save_ptr);
+  if (!cp) {
+    return false;
+  }
+  ap = strtok_r(NULL, " ", &save_ptr);
+  if (!ap) {
+    return false;
+  }
+  match_res = MatchField(cp, ap, field_names, MEMINFO_FIELD_COUNT,
+                         &val, &field_idx);
+  if (match_res == PARSE_SUCCESS) {
+    mi->arr[field_idx] = val;
+  }
+  return (match_res != PARSE_FAIL);
+}
+
+static int MemInfoParse(union meminfo *mi) {
+  size_t sz = 128;
+  char *buf = (char*)malloc(sz);
+  memset(mi, 0, sizeof(union meminfo));
+
+  FILE* fo = fopen(MEMINFO_PATH, "r");
+  if (fo == nullptr) {
+    return -1;
+  }
+
+  while (getline(&buf, &sz, fo) >= 0) {
+    if (!MemInfoParseLine(buf, mi)) {
+      LOGI("meminfo parse error");
+      return -1;
+    }
+  }
+
+  free(buf);
+  fclose(fo);
+
+  return 0;
+}
 
 /**
  * Counting memory pressure with a moving average.
@@ -470,22 +585,29 @@ class ProcessKiller {
     aProcs->UpdateInfo();
   }
 
-  static double ProcInfoKillScore(const ProcessInfo& aPInfo) {
+  static double ProcInfoKillScore(const ProcessInfo& aPInfo, bool aForcePurged) {
     // Prefer the processes that has more clean private pages over
     // processes that has dirty pages sicne dirty ones should be
     // written out before using it.
     //
     // Shared memory is not counted here for that it may not make more
     // available memory from shared memory to kill a process.
-    double score =
-      aPInfo.mPrivateClean +
-      aPInfo.mPrivateDirty * dirty_mem_weight +
-      aPInfo.mVmSwap * swapped_mem_weight;
+    double score  = aPInfo.mPrivateClean +
+                    aPInfo.mPrivateDirty * dirty_mem_weight;
+
+    // Prefer the higher SWAP space consumer to be killed.
+    if (aForcePurged) {
+      score  += aPInfo.mVmSwap * high_swapped_mem_weight;
+    } else {
+      score  += aPInfo.mVmSwap * swapped_mem_weight;
+    }
+
     return score;
   }
 
   static int _FindBestProcToKillOpt(ProcessList* aProcs,
-                                    bool aTryToKeep /* skip try_to_keep */) {
+                                    bool aTryToKeep /* skip try_to_keep */,
+                                    bool aForcePurged) {
     int best = -1;
     double best_score = 0.0;
     for (auto& proc : *aProcs) {
@@ -493,7 +615,7 @@ class ProcessKiller {
           (aTryToKeep && aProcs->HasTryToKeep(proc.GetPid()))) {
         continue;
       }
-      double score = ProcInfoKillScore(proc);
+      double score = ProcInfoKillScore(proc, aForcePurged);
       if (score > best_score) {
         best = proc.GetPid();
         best_score = score;
@@ -503,12 +625,12 @@ class ProcessKiller {
     return best;
   }
 
-  static int FindBestProcToKill(ProcessList* aProcs) {
+  static int FindBestProcToKill(ProcessList* aProcs, bool aForcePurged) {
     // Skip try_to_keep processes.
-    auto r = _FindBestProcToKillOpt(aProcs, true);
+    auto r = _FindBestProcToKillOpt(aProcs, true, aForcePurged);
     if (r < 0) {
       // Include try_to_keep processes too.
-      r = _FindBestProcToKillOpt(aProcs, false);
+      r = _FindBestProcToKillOpt(aProcs, false, aForcePurged);
     }
     return r;
   }
@@ -522,10 +644,10 @@ public:
    * processes other than try-to-keep ones, unless only try-to-keeps
    * ones are left.
    */
-  static void KillOneProc() {
+  static void KillOneProc(bool aForcePurged) {
     ProcessList procs;
     FillB2GProcessList(&procs);
-    int pid = FindBestProcToKill(&procs);
+    int pid = FindBestProcToKill(&procs, aForcePurged);
     if (pid < 0) {
       LOGD("There is no any process to kill!\n");
       return;
@@ -730,10 +852,29 @@ void WatchMemPressure() {
    * correctly.
    */
   auto killer = [&](unsigned int cnt) -> bool {
+    union meminfo mi;
+    bool already_purged = false;
+
+    if (MemInfoParse(&mi) < 0) {
+      LOGI("Failed to get free memory to parse meminfo!");
+    }
+
+    float swap_free_percent = (float) mi.field.free_swap / mi.field.total_swap;
+
+    if (swap_free_percent < swap_free_threshold) {
+      // Swap too much, now purge time. Kill until we got more SWAP space.
+      LOGI("SWAP free percentage is low, memory swap free percentage: %f\n", swap_free_percent);
+      LOGD("mi.field.free_swap: %lld", mi.field.free_swap);
+      LOGD("mi.field.total_swap: %lld", mi.field.total_swap);
+
+      ProcessKiller::KillOneProc(true);
+      already_purged = true;
+    }
+
     mpcounter->Add(cnt);
     bool memory_too_low = mpcounter->Average() > mem_pressure_threshold;
-    if (memory_too_low) {
-      ProcessKiller::KillOneProc();
+    if (memory_too_low && !already_purged) {
+      ProcessKiller::KillOneProc(false);
       LOGD("memory pressure counter %u, average %f\n",
                     cnt, mpcounter->Average());
     }
@@ -808,10 +949,13 @@ main() {
   property_get("ro.b2gkillerd.min_kick_interval", buf, "0.5");
   min_kick_interval = atof(buf);
 
+  property_get("ro.b2gkillerd.swap_free_threshold", buf, "0.25");
+  swap_free_threshold = atof(buf);
+
   LOGD("Reading config: mem_pressure_threshold: %f, gc_cc_max: %f,"
-               "gc_cc_min: %f, dirty_mem_weight: %f, swapped_mem_weight: %f,"
-               "minkickinterval: %f \n", mem_pressure_threshold, gc_cc_max,
-               gc_cc_min, dirty_mem_weight, swapped_mem_weight, min_kick_interval);
+       "gc_cc_min: %f, dirty_mem_weight: %f, swapped_mem_weight: %f,"
+       "minkickinterval: %f, swap_free_threshold: %f  \n", mem_pressure_threshold, gc_cc_max,
+       gc_cc_min, dirty_mem_weight, swapped_mem_weight, min_kick_interval, swap_free_threshold);
   #endif
 
   if (CheckCgroups()) {
