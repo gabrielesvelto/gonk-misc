@@ -272,6 +272,7 @@ else
 	echo "export MOZ_DISABLE_LTO=$(MOZ_DISABLE_LTO)"; \
 	echo "export HOST_OS=$(HOST_OS)";	\
 	echo "export PRODUCTION_OS_NAME=$(PRODUCTION_OS_NAME)"; \
+	echo "export ENABLE_RSU=$(ENABLE_RSU)"; \
 	) > .var.profile
 	unset CC_WRAPPER && unset CXX_WRAPPER && \
 	export GECKO_OBJDIR="$(abspath $(GECKO_OBJDIR))" && \
@@ -286,6 +287,7 @@ else
 	export MOZ_SANDBOX_GPU_NODE="$(MOZ_SANDBOX_GPU_NODE)" && \
 	export HOST_OS="$(HOST_OS)" && \
 	export PRODUCTION_OS_NAME="$(PRODUCTION_OS_NAME)" && \
+	export ENABLE_RSU="$(ENABLE_RSU)" && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh) && \
 	(cd $(GECKO_PATH) ; $(SHELL) build-b2g.sh package) && \
 	mkdir -p $(@D) && cp $(GECKO_OBJDIR)/dist/b2g-*.tar.bz2 $@
