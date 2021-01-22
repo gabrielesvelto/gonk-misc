@@ -74,7 +74,7 @@ on boot
     mkdir /dev/memcg/b2g/default
     # Fine tune b2gkillerd memory config
     setprop ro.b2gkillerd.debug false
-    setprop ro.b2gkillerd.mem_pressure_threshold "60"
+    setprop ro.b2gkillerd.mem_pressure_threshold "20"
     setprop ro.b2gkillerd.gc_cc_max "59"
     setprop ro.b2gkillerd.gc_cc_min "50"
     setprop ro.b2gkillerd.dirty_mem_weight "0.2"
