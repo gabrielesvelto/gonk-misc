@@ -18,6 +18,7 @@ binder_call(netd, b2g)
 binder_call(b2g, init)
 binder_call(b2g, cameraserver)
 binder_call(cameraserver, b2g)
+binder_call(mediaextractor, b2g)
 
 # force SELinux to keep environment variables when calling
 # execve(plugin-container,...) to preserve LD_PRELOAD which is
@@ -161,7 +162,6 @@ allow b2g gatekeeper_data_file:dir rw_dir_perms;
 allow b2g gatekeeper_data_file:file rw_file_perms;
 allow b2g init:unix_dgram_socket sendto;
 allow b2g perfprofd_data_file:dir r_dir_perms;
-allow b2g storage_file:dir r_dir_perms;
 allow b2g adb_data_file:dir r_dir_perms;
 allow b2g kernel:key search;
 allow b2g perfprofd_data_file:dir w_dir_perms;
@@ -175,7 +175,6 @@ allow b2g vfat:file create_file_perms;
 allow b2g mnt_media_rw_file:dir rw_dir_perms;
 allow b2g mnt_user_file:dir r_dir_perms;
 allow b2g mnt_user_file:lnk_file r_file_perms;
-allow b2g storage_file:lnk_file r_file_perms;
 
 allow b2g mediaserver_service:service_manager find;
 
@@ -232,13 +231,13 @@ allow dumpstate b2g:binder call;
 allow gatekeeperd b2g:binder call;
 
 # config tethering IPv6 router mode
-allow b2g proc_net:file write;
+allow b2g proc_net:file rw_file_perms;
 
 # config for dongle dhcp
 allow b2g dhcp_data_file:file unlink;
 
 ###new sepolicy add in next
-allow b2g binder_device:chr_file { ioctl open read write };
+allow b2g binder_device:chr_file rw_file_perms;
 allow b2g configfs:dir create_dir_perms;
 allow b2g configfs:file create_file_perms;
 allow b2g hwservicemanager_prop:file rw_file_perms;
@@ -288,6 +287,7 @@ get_prop(b2g, exported3_default_prop);
 get_prop(b2g, serialno_prop);
 get_prop(b2g, config_prop);
 get_prop(b2g, persist_debug_prop);
+get_prop(b2g, exported3_radio_prop);
 set_prop(b2g, radio_prop);
 set_prop(b2g, bluetooth_prop);
 set_prop(b2g, ctl_default_prop);
@@ -302,8 +302,13 @@ set_prop(b2g, default_prop);
 set_prop(b2g, system_prop);
 set_prop(b2g, system_radio_prop);
 set_prop(b2g, exported3_system_prop);
+set_prop(b2g, net_dns_prop);
 
 wakelock_use(b2g)
 hal_client_domain(b2g, hal_allocator)
 
 allowxperm b2g self:udp_socket ioctl ~SIOCATMARK;
+
+hal_client_domain(b2g, hal_gnss)
+r_dir_file(b2g, storage_file)
+r_dir_file(b2g, cgroup_rc_file)

@@ -1,3 +1,5 @@
-allow dhcp dhcp:udp_socket ioctl;
+allow dhcp self:udp_socket ioctl;
+allowxperm dhcp self:udp_socket ioctl priv_sock_ioctls;
 allow dhcp proc_net:file { open read getattr };
 allow dhcp system_file:dir { open read };
+r_dir_file(dhcp, sysfs_net)

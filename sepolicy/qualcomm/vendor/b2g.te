@@ -7,6 +7,13 @@ allow b2g sysfs_graphics:file create_file_perms;
 allow b2g sysfs_usb_supply:dir create_dir_perms;
 allow b2g sysfs_usb_supply:file create_file_perms;
 allow b2g vendor_audio_prop:file rw_file_perms;
+allow b2g wpa_data_file:file rw_file_perms;
+allow b2g vendor_time_data_file:file rw_file_perms;
+
+allow b2g fm_radio_device:chr_file rw_file_perms;
+set_prop(b2g, fm_prop)
+allow b2g vendor_fm_data_file:file create_file_perms;
+allow b2g vendor_fm_data_file:dir ra_dir_perms;
 
 binder_call(b2g, ims)
 binder_call(ims, b2g)

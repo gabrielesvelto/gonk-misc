@@ -1,14 +1,15 @@
-# bluetoothd
+typeattribute bluetoothd binder_in_vendor_violators, vendor_executes_system_violators;
+
 init_daemon_domain(bluetoothd)
 
 # audit2allow
 allow bluetoothd b2g:unix_stream_socket connectto;
 allow bluetoothd init:unix_stream_socket connectto;
 
-allow bluetoothd bluetooth_data_file:dir rw_dir_perms;
-allow bluetoothd bluetooth_data_file:file create_file_perms;
+allow bluetoothd bluetooth_prop:property_service set;
 allow bluetoothd hci_attach_dev:chr_file rw_file_perms;
-allow bluetoothd proc_bluetooth_writable:file w_file_perms;
+allow bluetoothd input_device:dir r_dir_perms;
+allow bluetoothd property_socket:sock_file w_file_perms;
 allow bluetoothd self:capability { net_admin sys_nice };
 allow bluetoothd sysfs_bluetooth_writable:file w_file_perms;
 allow bluetoothd sysfs_wake_lock:file rw_file_perms;
@@ -16,6 +17,69 @@ allow bluetoothd bluetooth_prop:property_service set;
 allow bluetoothd property_socket:sock_file w_file_perms;
 allow bluetoothd sysfs:file w_file_perms;
 allow bluetoothd serial_device:chr_file rw_file_perms;
-allow bluetoothd input_device:dir r_dir_perms;
+
+get_prop(bluetoothd, hwservicemanager_prop)
+binder_use(bluetoothd)
+allow bluetoothd binder_device:chr_file rw_file_perms;
+allow bluetoothd keystore_service:service_manager find;
+
+allow bluetoothd system_file:file r_file_perms;
+
+# below rules are adapted from system/sepolicy/private/bluetooth.te
+
+# Socket creation under /data/misc/bluedroid.
+type_transition bluetoothd bluetooth_data_file:sock_file bluetooth_socket;
+
+# Allow access to net_admin ioctls
+allowxperm bluetoothd self:udp_socket ioctl priv_sock_ioctls;
+
+wakelock_use(bluetoothd)
+
+# Data file accesses.
+allow bluetoothd bluetooth_data_file:dir create_dir_perms;
+allow bluetoothd bluetooth_data_file:notdevfile_class_set create_file_perms;
+allow bluetoothd bluetooth_logs_data_file:dir rw_dir_perms;
+allow bluetoothd bluetooth_logs_data_file:file create_file_perms;
+
+# Socket creation under /data/misc/bluedroid.
+allow bluetoothd bluetooth_socket:sock_file create_file_perms;
+
+allow bluetoothd self:global_capability_class_set net_admin;
+allow bluetoothd self:global_capability2_class_set wake_alarm;
+
+# tethering
+allow bluetoothd self:packet_socket create_socket_perms_no_ioctl;
+allow bluetoothd self:global_capability_class_set { net_admin net_raw net_bind_service };
+allow bluetoothd self:tun_socket create_socket_perms_no_ioctl;
+allow bluetoothd tun_device:chr_file rw_file_perms;
+allowxperm bluetoothd tun_device:chr_file ioctl { TUNGETIFF TUNSETIFF };
+allow bluetoothd efs_file:dir search;
+
+# allow Bluetooth to access uhid device for HID profile
 allow bluetoothd uhid_device:chr_file rw_file_perms;
-allow bluetoothd self:capability2 block_suspend;
+
+# proc access.
+allow bluetoothd proc_bluetooth_writable:file rw_file_perms;
+
+# Allow write access to bluetooth specific properties
+set_prop(bluetoothd, bluetooth_a2dp_offload_prop)
+set_prop(bluetoothd, bluetooth_audio_hal_prop)
+set_prop(bluetoothd, bluetooth_prop)
+
+allow bluetoothd audioserver_service:service_manager find;
+allow bluetoothd bluetooth_service:service_manager find;
+allow bluetoothd drmserver_service:service_manager find;
+allow bluetoothd mediaserver_service:service_manager find;
+allow bluetoothd radio_service:service_manager find;
+allow bluetoothd app_api_service:service_manager find;
+allow bluetoothd system_api_service:service_manager find;
+allow bluetoothd network_stack_service:service_manager find;
+
+# Bluetooth audio needs RT scheduling to meet deadlines, allow sys_nice
+allow bluetoothd self:global_capability_class_set sys_nice;
+
+hal_client_domain(bluetoothd, hal_bluetooth)
+hal_client_domain(bluetoothd, hal_telephony)
+
+# Bluetooth A2DP offload requires binding with audio HAL
+hal_client_domain(bluetoothd, hal_audio)

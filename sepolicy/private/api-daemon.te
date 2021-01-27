@@ -99,3 +99,21 @@ proc_vmstat
 
 get_prop(api-daemon, hwservicemanager_prop);
 set_prop(api-daemon, default_prop);
+
+allow api-daemon proc_diskstats:file getattr;
+allow api-daemon proc_interrupts:file getattr;
+allow api-daemon proc_pagetypeinfo:file getattr;
+allow api-daemon proc_uid_concurrent_active_time:file getattr;
+allow api-daemon proc_uid_concurrent_policy_time:file getattr;
+allow api-daemon proc_uid_time_in_state:file getattr;
+allow api-daemon proc_vmallocinfo:file getattr;
+allow api-daemon proc_zoneinfo:file getattr;
+allow api-daemon system_suspend_hwservice:hwservice_manager find;
+
+# for factory reset, copied from system_server
+allow api-daemon cache_file:lnk_file r_file_perms;
+allow api-daemon { cache_file cache_recovery_file }:dir { relabelfrom create_dir_perms };
+allow api-daemon { cache_file cache_recovery_file }:file { relabelfrom create_file_perms };
+allow api-daemon { cache_file cache_recovery_file }:fifo_file create_file_perms;
+
+set_prop(api-daemon, powerctl_prop)
