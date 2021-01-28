@@ -1,0 +1,3 @@
+# IPv6 tethering, provide router advertisement packet
+type radvd, domain;
+type radvd_exec, exec_type, file_type;

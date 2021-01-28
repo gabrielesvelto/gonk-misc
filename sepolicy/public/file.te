@@ -4,3 +4,4 @@
 # Default type for anything inside /data/b2g
 type b2g_data_file, file_type, data_file_type;
 type api_data_file, file_type, data_file_type;
+type radvd_data_file, file_type, data_file_type;

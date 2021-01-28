@@ -14,6 +14,8 @@
 /dev/sec-nfc                    u:object_r:nfc_device:s0
 #/dev/nq-nci                     u:object_r:nfc_device:s0
 
+# IPv6 tethering
+/data/misc/radvd(/.*)?          u:object_r:radvd_data_file:s0
 #############################
 # B2G executables
 #
@@ -23,6 +25,7 @@
 /system/b2g/plugin-container    u:object_r:plugin-container_exec:s0
 /system/bin/gonksched           u:object_r:gonksched_exec:s0
 /system/bin/gonkservices        u:object_r:gonkservices_exec:s0
+/system/bin/radvd               u:object_r:radvd_exec:s0
 /system/bin/rilproxy            u:object_r:rilproxy_exec:s0
 /system/bin/fakeappops          u:object_r:fakeappops_exec:s0
 /system/bin/bluetoothd          u:object_r:bluetoothd_exec:s0

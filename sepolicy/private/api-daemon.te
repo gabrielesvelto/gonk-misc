@@ -117,3 +117,4 @@ allow api-daemon { cache_file cache_recovery_file }:file { relabelfrom create_fi
 allow api-daemon { cache_file cache_recovery_file }:fifo_file create_file_perms;
 
 set_prop(api-daemon, powerctl_prop)
+set_prop(api-daemon, exported_system_prop)

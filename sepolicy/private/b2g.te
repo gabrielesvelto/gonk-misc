@@ -19,6 +19,7 @@ binder_call(b2g, init)
 binder_call(b2g, cameraserver)
 binder_call(cameraserver, b2g)
 binder_call(mediaextractor, b2g)
+binder_call(b2g, system_suspend)
 
 # force SELinux to keep environment variables when calling
 # execve(plugin-container,...) to preserve LD_PRELOAD which is
@@ -54,7 +55,6 @@ allow b2g camera_data_file:file rw_file_perms;
 allow b2g camera_data_file:sock_file create_file_perms;
 allow b2g cgroup:dir create_dir_perms;
 allow b2g dalvikcache_data_file:dir rw_dir_perms;
-allow b2g default_android_service:service_manager add;
 allow b2g device:chr_file rw_file_perms;
 allow b2g device:dir rw_dir_perms;
 allow b2g device:sock_file w_file_perms;
@@ -131,7 +131,6 @@ allow b2g shell_data_file:file create_file_perms;
 allow b2g shell_data_file:sock_file getattr;
 allow b2g socket_device:dir rw_dir_perms;
 allow b2g socket_device:sock_file create_file_perms;
-allow b2g surfaceflinger_service:service_manager add;
 allow b2g sysfs:file rw_file_perms;
 allow b2g sysfs_lowmemorykiller:dir create_dir_perms;
 allow b2g sysfs_lowmemorykiller:file create_file_perms;
@@ -143,8 +142,8 @@ allow b2g system_data_file:fifo_file create_file_perms;
 allow b2g system_file:file rx_file_perms;
 allow b2g system_wpa_socket:sock_file create_file_perms;
 allow b2g systemkeys_data_file:dir rw_dir_perms;
-allow b2g system_server_service:service_manager add;
 allow b2g tmpfs:dir create_dir_perms;
+allow b2g tmpfs:file create_file_perms;
 allow b2g tombstone_data_file:dir rw_dir_perms;
 allow b2g tombstone_data_file:file create_file_perms;
 allow b2g ueventd:dir r_dir_perms;
@@ -169,7 +168,8 @@ allow b2g adb_data_file:dir rw_dir_perms;
 allow b2g backup_data_file:dir rw_dir_perms;
 allow b2g heapdump_data_file:dir rw_dir_perms;
 
-allow b2g vold_data_file:dir rw_dir_perms;
+allow b2g vold_data_file:dir create_dir_perms;
+allow b2g vold_data_file:file create_file_perms;
 allow b2g vfat:dir create_dir_perms;
 allow b2g vfat:file create_file_perms;
 allow b2g mnt_media_rw_file:dir rw_dir_perms;
@@ -211,8 +211,8 @@ allow b2g block_device:blk_file r_file_perms;
 allow b2g rtc_device:chr_file rw_file_perms;
 #Allow b2g_telephony data collector to connect with metrics-daemon
 allow b2g metrics-daemon:unix_stream_socket connectto;
-allow b2g unlabeled:dir rw_dir_perms;
-allow b2g unlabeled:file rw_file_perms;
+allow b2g unlabeled:dir create_dir_perms;
+allow b2g unlabeled:file create_file_perms;
 
 # other domains that interact with b2g domain
 allow netd b2g:fd use;
@@ -240,33 +240,77 @@ allow b2g dhcp_data_file:file unlink;
 allow b2g binder_device:chr_file rw_file_perms;
 allow b2g configfs:dir create_dir_perms;
 allow b2g configfs:file create_file_perms;
-allow b2g hwservicemanager_prop:file rw_file_perms;
 allow b2g hwservicemanager:binder call;
 allow b2g ion_device:chr_file rw_file_perms;
+allow b2g mnt_vendor_file:dir create_dir_perms;
+allow b2g mnt_vendor_file:file create_file_perms;
 allow b2g nativetest_data_file:dir r_dir_perms;
 allow b2g nativetest_data_file:file r_file_perms;
 allow b2g proc_modules:file rw_file_perms;
 allow b2g proc_meminfo:file rw_file_perms;
 allow b2g proc_pid_max:file rw_file_perms;
+allow b2g same_process_hal_file:file rx_file_perms;
 allow b2g storage_stub_file:dir create_dir_perms;
 allow b2g storage_stub_file:file create_file_perms;
 allow b2g sysfs:dir create_dir_perms;
 allow b2g sysfs_android_usb:dir create_dir_perms;
 allow b2g sysfs_android_usb:file create_file_perms;
 allow b2g sysfs_leds:dir rw_dir_perms;
+allow b2g sysfs_leds:file rw_file_perms;
 allow b2g sysfs_power:file rw_file_perms;
 allow b2g system_data_file:lnk_file create_file_perms;
-allow b2g system_prop:file rw_file_perms;
 allow b2g toolbox_exec:file rwx_file_perms;
 allow b2g trace_data_file:dir r_dir_perms;
 allow b2g unencrypted_data_file:file r_file_perms;
 allow b2g vendor_toolbox_exec:file rwx_file_perms;
+
+allow b2g apex_data_file:dir create_dir_perms;
+allow b2g apex_data_file:file create_file_perms;
+allow b2g audioserver_data_file:dir create_dir_perms;
+allow b2g audioserver_data_file:file create_file_perms;
+allow b2g bluetooth_logs_data_file:dir create_dir_perms;
+allow b2g bluetooth_logs_data_file:file create_file_perms;
+allow b2g bootstat_data_file:dir create_dir_perms;
+allow b2g bootstat_data_file:file create_file_perms;
+allow b2g boottrace_data_file:dir create_dir_perms;
+allow b2g boottrace_data_file:file create_file_perms;
+allow b2g iorapd_data_file:dir create_dir_perms;
+allow b2g iorapd_data_file:file create_file_perms;
+allow b2g method_trace_data_file:dir create_dir_perms;
+allow b2g method_trace_data_file:file create_file_perms;
+allow b2g misc_logd_file:dir create_dir_perms;
+allow b2g misc_logd_file:file create_file_perms;
+allow b2g network_watchlist_data_file:dir create_dir_perms;
+allow b2g network_watchlist_data_file:file create_file_perms;
+allow b2g ota_package_file:dir create_dir_perms;
+allow b2g ota_package_file:file create_file_perms;
+allow b2g preloads_data_file:dir create_dir_perms;
+allow b2g preloads_data_file:file create_file_perms;
+allow b2g recovery_data_file:dir create_dir_perms;
+allow b2g recovery_data_file:file create_file_perms;
+allow b2g storaged_data_file:dir create_dir_perms;
+allow b2g storaged_data_file:file create_file_perms;
+allow b2g unencrypted_data_file:dir create_dir_perms;
+allow b2g unencrypted_data_file:file create_file_perms;
+allow b2g textclassifier_data_file:dir create_dir_perms;
+allow b2g textclassifier_data_file:file create_file_perms;
+allow b2g update_engine_data_file:dir create_dir_perms;
+allow b2g update_engine_data_file:file create_file_perms;
+allow b2g update_engine_log_data_file:dir create_dir_perms;
+allow b2g update_engine_log_data_file:file create_file_perms;
+allow b2g user_profile_data_file:dir create_dir_perms;
+allow b2g user_profile_data_file:file create_file_perms;
+allow b2g vendor_data_file:dir create_dir_perms;
+allow b2g vendor_data_file:file create_file_perms;
+allow b2g wm_trace_data_file:dir create_dir_perms;
+allow b2g wm_trace_data_file:file create_file_perms;
 
 allow b2g ashmem_device_service:service_manager find;
 allow b2g audioserver_service:service_manager find;
 allow b2g cameraserver_service:service_manager find;
 allow b2g dnsresolver_service:service_manager find;
 allow b2g hal_configstore_ISurfaceFlingerConfigs:hwservice_manager find;
+allow b2g hal_gnss_hwservice:hwservice_manager find;
 allow b2g hal_graphics_allocator_hwservice:hwservice_manager find;
 allow b2g hal_graphics_composer_hwservice:hwservice_manager find;
 allow b2g hal_graphics_mapper_hwservice:hwservice_manager find;
@@ -280,8 +324,14 @@ allow b2g vold_service:service_manager find;
 allow b2g wificond_service:service_manager find;
 
 allow b2g ashmemd:binder call;
-allow b2g system_wifi_keystore_hwservice:hwservice_manager add;
+allow b2g b2g_connectivity_wifi_binder_service:service_manager add;
+allow b2g b2g_connectivity_binder_service:service_manager add;
+allow b2g b2g_datacall_binder_service:service_manager add;
+allow b2g default_android_service:service_manager add;
 allow b2g hidl_base_hwservice:hwservice_manager add;
+allow b2g surfaceflinger_service:service_manager add;
+allow b2g system_wifi_keystore_hwservice:hwservice_manager add;
+allow b2g system_server_service:service_manager add;
 
 get_prop(b2g, exported3_default_prop);
 get_prop(b2g, serialno_prop);
@@ -301,14 +351,25 @@ set_prop(b2g, radio_prop);
 set_prop(b2g, default_prop);
 set_prop(b2g, system_prop);
 set_prop(b2g, system_radio_prop);
+set_prop(b2g, exported_system_radio_prop);
+set_prop(b2g, exported2_system_prop);
 set_prop(b2g, exported3_system_prop);
 set_prop(b2g, net_dns_prop);
+set_prop(b2g, hwservicemanager_prop);
 
 wakelock_use(b2g)
 hal_client_domain(b2g, hal_allocator)
 
+allow b2g netd:unix_stream_socket connectto;
 allowxperm b2g self:udp_socket ioctl ~SIOCATMARK;
 
 hal_client_domain(b2g, hal_gnss)
-r_dir_file(b2g, storage_file)
 r_dir_file(b2g, cgroup_rc_file)
+r_dir_file(b2g, dropbox_data_file)
+r_dir_file(b2g, fingerprint_vendor_data_file)
+r_dir_file(b2g, ota_data_file)
+r_dir_file(b2g, profman_dump_data_file)
+r_dir_file(b2g, server_configurable_flags_data_file)
+r_dir_file(b2g, storage_file)
+r_dir_file(b2g, staging_data_file)
+r_dir_file(b2g, sysfs_net)

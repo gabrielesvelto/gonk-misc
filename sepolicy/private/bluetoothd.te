@@ -65,6 +65,9 @@ allow bluetoothd proc_bluetooth_writable:file rw_file_perms;
 set_prop(bluetoothd, bluetooth_a2dp_offload_prop)
 set_prop(bluetoothd, bluetooth_audio_hal_prop)
 set_prop(bluetoothd, bluetooth_prop)
+get_prop(bluetoothd, default_prop)
+get_prop(bluetoothd, system_prop)
+get_prop(bluetoothd, exported3_default_prop)
 
 allow bluetoothd audioserver_service:service_manager find;
 allow bluetoothd bluetooth_service:service_manager find;

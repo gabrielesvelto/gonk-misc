@@ -1,0 +1,4 @@
+allow cnefwk b2g_connectivity_wifi_binder_service:service_manager find;
+allow cnefwk b2g_connectivity_binder_service:service_manager find;
+allow cnefwk b2g_datacall_binder_service:service_manager find;
+allow cnefwk default_android_service:service_manager find;

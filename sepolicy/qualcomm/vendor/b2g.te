@@ -6,16 +6,65 @@ allow b2g sysfs_graphics:dir create_dir_perms;
 allow b2g sysfs_graphics:file create_file_perms;
 allow b2g sysfs_usb_supply:dir create_dir_perms;
 allow b2g sysfs_usb_supply:file create_file_perms;
-allow b2g vendor_audio_prop:file rw_file_perms;
-allow b2g wpa_data_file:file rw_file_perms;
-allow b2g vendor_time_data_file:file rw_file_perms;
 
+allow b2g cnd_data_file:dir create_dir_perms;
+allow b2g cnd_data_file:file create_file_perms;
 allow b2g fm_radio_device:chr_file rw_file_perms;
-set_prop(b2g, fm_prop)
 allow b2g vendor_fm_data_file:file create_file_perms;
 allow b2g vendor_fm_data_file:dir ra_dir_perms;
+allow b2g hbtp_log_file:dir create_dir_perms;
+allow b2g hbtp_log_file:file create_file_perms;
+allow b2g location_data_file:dir create_dir_perms;
+allow b2g location_data_file:file create_file_perms;
+allow b2g netmgrd_data_file:dir create_dir_perms;
+allow b2g netmgrd_data_file:file create_file_perms;
+allow b2g port_bridge_data_file:dir create_dir_perms;
+allow b2g port_bridge_data_file:file create_file_perms;
+allow b2g qti_logkit_priv_data_file:dir create_dir_perms;
+allow b2g qti_logkit_priv_data_file:file create_file_perms;
+allow b2g qti_logkit_priv_socket:dir create_dir_perms;
+allow b2g qti_logkit_priv_socket:file create_file_perms;
+allow b2g qti_logkit_pub_data_file:dir create_dir_perms;
+allow b2g qti_logkit_pub_data_file:file create_file_perms;
+allow b2g swap_data_file:dir create_dir_perms;
+allow b2g swap_data_file:file create_file_perms;
+allow b2g vendor_mbn_data_file:dir create_dir_perms;
+allow b2g vendor_mbn_data_file:file create_file_perms;
+allow b2g vendor_media_data_file:dir create_dir_perms;
+allow b2g vendor_media_data_file:file create_file_perms;
+allow b2g vendor_radio_data_file:dir create_dir_perms;
+allow b2g vendor_radio_data_file:file create_file_perms;
+allow b2g vendor_time_data_file:dir create_file_perms;
+allow b2g vendor_time_data_file:file create_file_perms;
+allow b2g vendor_tombstone_data_file:dir create_file_perms;
+allow b2g vendor_tombstone_data_file:file create_file_perms;
+allow b2g wifi_vendor_data_file:dir create_file_perms;
+allow b2g wifi_vendor_data_file:file create_file_perms;
+allow b2g wifi_vendor_wpa_socket:dir create_file_perms;
+allow b2g wifi_vendor_wpa_socket:file create_file_perms;
+allow b2g wigig_hostapd_socket:dir create_file_perms;
+allow b2g wigig_hostapd_socket:file create_file_perms;
+allow b2g wpa_data_file:dir create_file_perms;
+allow b2g wpa_data_file:file create_file_perms;
+allow b2g wpa_data_file:sock_file create_file_perms;
+
+set_prop(b2g, fm_prop)
+set_prop(b2g, vendor_audio_prop)
 
 binder_call(b2g, ims)
 binder_call(ims, b2g)
 binder_call(b2g, rild)
 binder_call(rild, b2g)
+
+r_dir_file(b2g, data_qtee_file)
+r_dir_file(b2g, display_vendor_data_file)
+r_dir_file(b2g, lm_data_file)
+r_dir_file(b2g, qti_logkit_pub_socket)
+r_dir_file(b2g, ramdump_vendor_data_file)
+r_dir_file(b2g, vendor_audio_data_file)
+r_dir_file(b2g, vendor_camera_data_file)
+r_dir_file(b2g, vendor_qti_data_file)
+r_dir_file(b2g, vendor_scve_data_file)
+r_dir_file(b2g, vendor_time_data_file)
+r_dir_file(b2g, vendor_tui_data_file)
+r_dir_file(b2g, vendor_vpp_data_file)

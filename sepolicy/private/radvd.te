@@ -1,0 +1,6 @@
+# for IPv6 tethering radvd daemon
+allow radvd self:rawip_socket { create setopt getopt ioctl write read };
+allow radvd self:netlink_route_socket { create bind getattr nlmsg_read read setopt write };
+allow radvd b2g_data_file:file ioctl;
+allow radvd radvd_data_file:dir create_dir_perms;
+allow radvd radvd_data_file:file create_file_perms;
