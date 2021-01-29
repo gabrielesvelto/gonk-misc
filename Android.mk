@@ -270,6 +270,7 @@ else
 	echo "export TARGET_CPU_VARIANT=$(TARGET_CPU_VARIANT)"; \
 	echo "export PRODUCT_MANUFACTURER=$(PRODUCT_MANUFACTURER)"; \
 	echo "export MOZ_DISABLE_LTO=$(MOZ_DISABLE_LTO)"; \
+	echo "export MOZ_SANDBOX_GPU_NODE=$(MOZ_SANDBOX_GPU_NODE)" && \
 	echo "export HOST_OS=$(HOST_OS)";	\
 	echo "export PRODUCTION_OS_NAME=$(PRODUCTION_OS_NAME)"; \
 	echo "export ENABLE_RSU=$(ENABLE_RSU)"; \
