@@ -630,9 +630,9 @@ class GCCCKicker {
       if (pid <= 0) continue;
 
       snprintf(comm, commsz, "/proc/%d/comm", pid);
-      FILE *commfp = fopen(comm, "r");
-      if (commfp == nullptr) continue;
-      if (getline(&comm, &commsz, commfp) <= 0) continue;
+      std::unique_ptr<FILE, int(*)(FILE*)> commfp(fopen(comm, "r"), fclose);
+      if (!commfp) continue;
+      if (getline(&comm, &commsz, commfp.get()) <= 0) continue;
       if (strcmp(comm, "b2g\n")) continue;
       // The B2G parent process
       parent = pid;
