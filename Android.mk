@@ -198,6 +198,7 @@ GECKO_LIB_DEPS := \
 	android.hardware.graphics.composer@2.3.so \
 	android.hardware.power@1.0.so \
 	android.hardware.radio@1.0.so \
+	android.hardware.radio@1.1.so \
 	android.hardware.vibrator@1.0.so \
 	android.hardware.sensors@1.0.so \
 	android.hardware.wifi@1.0.so \
