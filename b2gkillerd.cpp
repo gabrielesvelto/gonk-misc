@@ -11,6 +11,7 @@
 #include <sys/un.h>
 #include <sys/socket.h>
 
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -864,8 +865,8 @@ void WatchMemPressure() {
     if (swap_free_percent < swap_free_threshold) {
       // Swap too much, now purge time. Kill until we got more SWAP space.
       LOGI("SWAP free percentage is low, memory swap free percentage: %f\n", swap_free_percent);
-      LOGD("mi.field.free_swap: %lld", mi.field.free_swap);
-      LOGD("mi.field.total_swap: %lld", mi.field.total_swap);
+      LOGD("mi.field.free_swap: %" PRIi64, mi.field.free_swap);
+      LOGD("mi.field.total_swap: %" PRIi64, mi.field.total_swap);
 
       ProcessKiller::KillOneProc(true);
       already_purged = true;
